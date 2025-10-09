@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 // Stylesheet Imports
-import styles from "@/app/(pages)/dashboard/timeline/Timeline.module.scss";
+import styles from "@/app/(pages)/(dashboard)/timeline/Timeline.module.scss";
 
 // Import TimelinePopup component
 import TimelinePopup, {

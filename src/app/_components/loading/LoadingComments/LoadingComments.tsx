@@ -1,24 +1,27 @@
-import React from "react"
-
-import LoadingSpinner from "../LoadingSpinner"
-import styles from "@/app/_components/loading/LoadingComments/LoadingComments.module.scss"
+import React from "react";
+import LoadingSpinner from "../LoadingSpinner";
+import styles from "@/app/_components/loading/LoadingComments/LoadingComments.module.scss";
 
 interface LoadingCommentsProps {
-  additionalText?: string
+  additionalText?: string;
 }
 
+/**
+ * LoadingComments - Loading indicator for comments section
+ * Now uses enhanced LoadingSpinner with text support
+ */
 const LoadingComments: React.FC<LoadingCommentsProps> = ({
-  additionalText
+  additionalText,
 }) => {
+  const loadingText = additionalText
+    ? `Loading Comments...\n${additionalText}`
+    : "Loading Comments...";
+
   return (
     <div className={styles.loadingContainer}>
-      <LoadingSpinner/>
-      <br /><br/>
-      Loading Comments...
-      <br />
-      {additionalText}
+      <LoadingSpinner size="medium" text={loadingText} />
     </div>
-  )
-}
+  );
+};
 
-export default LoadingComments
+export default LoadingComments;

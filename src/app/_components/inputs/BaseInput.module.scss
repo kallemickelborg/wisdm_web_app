@@ -1,0 +1,206 @@
+// Container
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$gap-small;
+
+  &.fullWidth {
+    width: 100%;
+  }
+}
+
+// Label
+.label {
+  @include vars.use-font("regular");
+  font-size: vars.$font-size-body-small;
+  color: vars.$color-font-body;
+  margin-bottom: vars.$margin-small;
+}
+
+// Input wrapper
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: vars.$radius-medium;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    outline: 2px solid vars.$color-brand;
+    outline-offset: 1px;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.error {
+    border-color: #ff4d4d !important;
+
+    &:focus-within {
+      outline-color: #ff4d4d;
+    }
+  }
+
+  &.success {
+    border-color: #1bab03 !important;
+  }
+}
+
+// Input element
+.input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: vars.$color-font-body;
+  outline: none;
+  width: 100%;
+
+  &::placeholder {
+    color: vars.$color-font-body;
+    opacity: 0.6;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  // Textarea specific
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+// Size variants
+.sizeSmall {
+  .input {
+    padding: vars.$padding-small vars.$padding-medium;
+    font-size: vars.$font-size-body-small;
+    min-height: 32px;
+  }
+
+  &.hasLeftIcon .input {
+    padding-left: vars.$padding-large;
+  }
+
+  &.hasRightIcon .input {
+    padding-right: vars.$padding-large;
+  }
+}
+
+.sizeMedium {
+  .input {
+    padding: vars.$padding-small vars.$padding-medium;
+    font-size: vars.$font-size-body-medium;
+    min-height: 40px;
+  }
+
+  &.hasLeftIcon .input {
+    padding-left: vars.$padding-large;
+  }
+
+  &.hasRightIcon .input {
+    padding-right: vars.$padding-large;
+  }
+}
+
+.sizeLarge {
+  .input {
+    padding: vars.$padding-medium vars.$padding-large;
+    font-size: vars.$font-size-body-large;
+    min-height: 48px;
+  }
+
+  &.hasLeftIcon .input {
+    padding-left: vars.$padding-large;
+  }
+
+  &.hasRightIcon .input {
+    padding-right: vars.$padding-large;
+  }
+}
+
+// Variant styles
+.variantDefault {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+
+  &:hover:not(.disabled) {
+    border-color: vars.$color-brand;
+  }
+}
+
+.variantFilled {
+  background-color: var(--color-input);
+  border: 1px solid transparent;
+
+  &:hover:not(.disabled) {
+    background-color: var(--color-input-hover);
+  }
+}
+
+.variantOutlined {
+  background-color: transparent;
+  border: 2px solid var(--color-border);
+
+  &:hover:not(.disabled) {
+    border-color: vars.$color-brand;
+  }
+
+  &:focus-within {
+    border-color: vars.$color-brand;
+  }
+}
+
+// Icon styles
+.leftIcon,
+.rightIcon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: vars.$color-font-body;
+  opacity: 0.6;
+}
+
+.leftIcon {
+  left: vars.$padding-medium;
+}
+
+.rightIcon {
+  right: vars.$padding-medium;
+}
+
+// Helper and error text
+.helperText,
+.errorText {
+  margin: 0;
+  font-size: vars.$font-size-body-small;
+}
+
+.helperText {
+  color: vars.$color-font-body;
+  opacity: 0.6;
+}
+
+.errorText {
+  color: #ff4d4d;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .input {
+    font-size: vars.$font-size-body-small;
+  }
+
+  .sizeLarge {
+    .input {
+      padding: vars.$padding-small vars.$padding-medium;
+      font-size: vars.$font-size-body-medium;
+      min-height: 44px;
+    }
+  }
+}

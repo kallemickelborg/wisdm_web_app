@@ -1,0 +1,192 @@
+// Base button styles
+.baseButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: vars.$gap-small;
+  border: none;
+  border-radius: vars.$radius-medium;
+  cursor: pointer;
+  transition: vars.$transition-duration-short;
+  position: relative;
+  white-space: nowrap;
+
+  &:focus {
+    outline: 2px solid vars.$color-brand;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.fullWidth {
+    width: 100%;
+  }
+
+  &.loading {
+    pointer-events: none;
+  }
+}
+
+// Size variants
+.sizeSmall {
+  padding: vars.$padding-small vars.$padding-medium;
+  font-size: vars.$font-size-body-small;
+  min-height: 32px;
+}
+
+.sizeMedium {
+  padding: vars.$padding-small vars.$padding-medium;
+  font-size: vars.$font-size-body-medium;
+  min-height: 40px;
+}
+
+.sizeLarge {
+  padding: vars.$padding-medium vars.$padding-large;
+  font-size: vars.$font-size-body-large;
+  min-height: 48px;
+}
+
+// Icon only variant
+.iconOnly {
+  padding: vars.$padding-small;
+  aspect-ratio: 1;
+
+  &.sizeSmall {
+    width: 32px;
+    height: 32px;
+  }
+
+  &.sizeMedium {
+    width: 40px;
+    height: 40px;
+  }
+
+  &.sizeLarge {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+// Button variants
+.variantPrimary {
+  background-color: vars.$color-brand;
+
+  &:hover:not(:disabled) {
+    background-color: hsl(266, 40%, 45%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(:disabled) {
+  }
+
+  span {
+    color: white;
+  }
+}
+
+.variantSecondary {
+  background-color: transparent;
+  color: vars.$color-brand;
+  border: 2px solid vars.$color-brand;
+
+  /*   &:hover:not(:disabled) {
+    background-color: rgba(vars.$color-brand-rgb, 0.1);
+    transform: translateY(-1px);
+  } */
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.variantTertiary {
+  background-color: transparent;
+  color: vars.$color-font-body;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-input);
+    color: vars.$color-brand;
+  }
+}
+
+.variantAuth {
+  background-color: var(--color-input); // FIX HOVER COLOR BELOW
+  color: vars.$color-font-body;
+  border: 1px solid var(--color-border);
+  padding: vars.$padding-medium vars.$padding-large;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-input-hover);
+    border-color: vars.$color-brand;
+  }
+
+  .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.variantIcon {
+  background-color: transparent;
+  color: vars.$color-font-body;
+  padding: vars.$padding-small;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-input);
+    color: vars.$color-brand;
+  }
+}
+
+// Icon wrapper
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// Button text
+.buttonText {
+  display: inline-block;
+}
+
+// Loading spinner
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .baseButton {
+    font-size: vars.$font-size-body-small;
+  }
+
+  .sizeLarge {
+    padding: vars.$padding-medium vars.$padding-large;
+    font-size: vars.$font-size-body-medium;
+    min-height: 44px;
+  }
+}

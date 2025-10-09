@@ -10,12 +10,15 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
+// Component Imports
+import BaseHeader from "@/app/_components/header";
+import BaseInput from "@/app/_components/inputs/BaseInput";
+import BaseButton from "@/app/_components/buttons/BaseButton";
+
 // Stylesheet Imports
-import styles from "@/app/(pages)/login/signup/personal/PersonalInfoPage.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
 
 // Asset Imports
-import arrowLeftWhite from "@/assets/icons/arrow_left_white.svg";
-import arrowLeftBrand from "@/assets/icons/arrow_left_brand.svg";
 import progressCircle2 from "@/assets/icons/progress_circle_2.svg";
 
 // Redux imports
@@ -218,79 +221,74 @@ const PersonalInfoPage = () => {
   ];
 
   return (
-    <div className={styles.loginContainer}>
-      <LoadingOverlay isVisible={isLoading} />
-      <div className={styles.onboardingHeader}>
-        <Link
-          onClick={onSignOut}
-          href="/login/signup"
-          className={styles.backButton}
-        >
-          <Image src={arrowLeftBrand} alt="Back button" />
-        </Link>
-        <Image
-          src={progressCircle2}
-          className={styles.progressCircles}
-          alt="Progress Indicator step 2"
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginContainer}>
+        <LoadingOverlay isVisible={isLoading} />
+        <BaseHeader
+          title="Tell us a little about yourself"
+          variant="auth"
+          backButton={{ href: "/login/signup", onClick: onSignOut }}
+          progressIndicator={{
+            current: 2,
+            total: 5,
+            icon: progressCircle2,
+          }}
         />
-      </div>
 
-      <div className={styles.onboardingTextBlock}>
-        <h1>Tell us a little about yourself</h1>
-      </div>
-
-      {inputFieldArray.map((item) => {
-        const { name, type, placeholder, value, label } = item;
-        return (
-          <div className={styles.labelWrapper} key={name}>
-            <label>{label}</label>
-            <input
-              className={styles.inputField}
+        {inputFieldArray.map((item) => {
+          const { name, type, placeholder, value, label } = item;
+          return (
+            <BaseInput
+              key={name}
+              label={label}
               name={name}
               type={type}
               placeholder={placeholder}
               value={value ?? ""}
               onChange={(e) => handleNameInputs(name, e.target.value)}
+              variant="filled"
+              fullWidth
             />
-          </div>
-        );
-      })}
+          );
+        })}
 
-      <p className={styles.infoText}>
-        Want to go anonymous? You can change it in the settings.
-      </p>
-
-      <div className={styles.labelWrapper}>
-        <label>What is your gender?</label>
-        <div className={styles.genderButtons}>
-          {genderOptionsArray.map((item) => {
-            return (
-              <button
-                key={item}
-                className={`${styles.genderButton} ${
-                  personalInfoState.gender === item ? styles.active : ""
-                }`}
-                onClick={() => handleSelection("gender", item)}
-              >
-                {item}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <OnboardingErrorSummary
-        formError={formError}
-        fieldErrors={fieldErrors}
-        className="errorSummaryContainer"
-      />
-
-      <div className={styles.nextWrapper}>
         <p className={styles.infoText}>
-          You can customize the visibility of your information in the settings
+          Want to go anonymous? You can change it in the settings.
         </p>
 
-        <SubmitButton text="Next" onClick={handleSubmission} />
+        <div className={styles.genderWrapper}>
+          <label>What is your gender?</label>
+          <div className={styles.genderButtons}>
+            {genderOptionsArray.map((item) => {
+              return (
+                <BaseButton
+                  key={item}
+                  variant={
+                    personalInfoState.gender === item ? "primary" : "secondary"
+                  }
+                  onClick={() => handleSelection("gender", item)}
+                  className={styles.genderButton}
+                >
+                  {item}
+                </BaseButton>
+              );
+            })}
+          </div>
+        </div>
+
+        <OnboardingErrorSummary
+          formError={formError}
+          fieldErrors={fieldErrors}
+          className="errorSummaryContainer"
+        />
+
+        <div className={styles.nextWrapper}>
+          <p className={styles.infoText}>
+            You can customize the visibility of your information in the settings
+          </p>
+
+          <SubmitButton text="Next" onClick={handleSubmission} />
+        </div>
       </div>
     </div>
   );

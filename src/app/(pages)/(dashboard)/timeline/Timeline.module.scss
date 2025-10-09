@@ -1,0 +1,156 @@
+// CLEAN UP THIS FILE
+// TIMELINE DASHBOARD PAGE
+
+.timelineContainer {
+  padding: vars.$padding-medium;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: vars.$gap-medium;
+
+  .timelineImage {
+    width: 80%;
+    height: 25vh;
+    border-radius: vars.$radius-large;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: vars.$shadow-box;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: vars.$radius-large;
+    }
+  }
+
+  .timelineEventsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    position: relative;
+    gap: vars.$gap-medium;
+
+    @media (max-width: 767px) {
+      width: 100%;
+    }
+
+    .timelineDots {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateX(-50%);
+      height: 100%;
+
+      @media (max-width: 767px) {
+        justify-content: flex-start;
+        height: auto;
+        bottom: auto;
+      }
+    }
+
+    .timelineDot {
+      width: 4px;
+      height: 4px;
+      background-color: #ccc;
+      border-radius: 50%;
+      flex-shrink: 0;
+
+      &.largeDot {
+        width: 8px;
+        height: 8px;
+        background-color: vars.$color-brand;
+      }
+
+      @media (max-width: 767px) {
+        width: 3px;
+        height: 3px;
+        margin-bottom: 7px;
+
+        &.largeDot {
+          width: 6px;
+          height: 6px;
+          margin-bottom: 4px;
+        }
+      }
+    }
+
+    .timelineEvent {
+      display: flex;
+      width: 100%;
+      position: relative;
+
+      .eventContainer {
+        width: 45%;
+        padding: vars.$padding-medium;
+        background-color: var(--color-timeline-event-bg);
+        border-radius: vars.$radius-large;
+        box-shadow: vars.$shadow-box;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+
+        .eventContent {
+          .eventDate {
+            h3 {
+              font-weight: bold;
+            }
+          }
+
+          .eventTitle {
+            h3 {
+              font-size: vars.$font-size-header-small;
+              font-weight: lighter;
+            }
+          }
+        }
+      }
+    }
+
+    .left {
+      .eventContainer {
+        margin-right: auto;
+      }
+    }
+
+    .right {
+      justify-content: flex-end;
+
+      .eventContainer {
+        margin-left: auto;
+      }
+    }
+  }
+
+  .highlightedEvent {
+    z-index: 10;
+
+    .eventContainer {
+      box-shadow: vars.$shadow-box;
+    }
+  }
+
+  // Comments
+  .toggleCommentsButton {
+    padding: vars.$profile-tab-padding;
+    background-color: var(--color-timeline-comment-bg);
+    color: vars.$color-font-body;
+    border: none;
+    border-radius: vars.$radius-small;
+    cursor: pointer;
+  }
+
+  .toggleCommentsButton:hover {
+    background-color: #555;
+  }
+}

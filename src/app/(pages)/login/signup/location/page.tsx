@@ -19,12 +19,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
+// Component Imports
+import BaseHeader from "@/app/_components/header";
+
 // Stylesheet Imports
-import styles from "@/app/(pages)/login/signup/location/LocationInfoPage.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
 
 // Asset Imports
-import arrowLeftWhite from "@/assets/icons/arrow_left_white.svg";
-import arrowLeftBrand from "@/assets/icons/arrow_left_brand.svg";
 import progressCircle3 from "@/assets/icons/progress_circle_3.svg";
 import countries from "@/assets/countries.json";
 
@@ -64,28 +65,25 @@ const LocationInfoPage = () => {
   };
 
   return (
-    <div className={styles.loginContainer}>
-      <LoadingOverlay isVisible={isLoading} />
-      <div className={styles.onboardingHeader}>
-        <Link href="/login/signup/personal" className={styles.backButton}>
-          <Image src={arrowLeftBrand} alt="Back button" />
-        </Link>
-        <Image
-          src={progressCircle3}
-          alt="progress indicator step three"
-          className={styles.progressCircles}
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginContainer}>
+        <LoadingOverlay isVisible={isLoading} />
+        <BaseHeader
+          title="Where do you live?"
+          subtitle="This helps us personalize your feed with more relevant content."
+          variant="auth"
+          backButton={{ href: "/login/signup/personal" }}
+          progressIndicator={{
+            current: 3,
+            total: 5,
+            icon: progressCircle3,
+          }}
         />
-      </div>
 
-      <div className={styles.onboardingTextBlock}>
-        <h1>Where do you live?</h1>
-        <p>This helps us personalize your feed with more relevant content.</p>
-      </div>
-
-      <div className={styles.labelWrapper}>
-        <label>
+        <div className={styles.selectWrapper}>
+          <label>Country</label>
           <select
-            className={styles.inputField}
+            className={styles.selectField}
             onChange={(e) => handleUpdate(e.target.value)}
             value={location || ""}
           >
@@ -100,25 +98,25 @@ const LocationInfoPage = () => {
               );
             })}
           </select>
-        </label>
-      </div>
+        </div>
 
-      <OnboardingErrorSummary
-        formError={formError}
-        fieldErrors={fieldErrors}
-        className="errorSummaryContainer"
-      />
-
-      <div className={styles.nextWrapper}>
-        <p className={styles.infoText}>
-          You can customize the visibility of your information in the settings
-        </p>
-
-        <SubmitButton
-          onClick={handleSubmission}
-          text="Next"
-          disabled={!location}
+        <OnboardingErrorSummary
+          formError={formError}
+          fieldErrors={fieldErrors}
+          className="errorSummaryContainer"
         />
+
+        <div className={styles.nextWrapper}>
+          <p className={styles.infoText}>
+            You can customize the visibility of your information in the settings
+          </p>
+
+          <SubmitButton
+            onClick={handleSubmission}
+            text="Next"
+            disabled={!location}
+          />
+        </div>
       </div>
     </div>
   );

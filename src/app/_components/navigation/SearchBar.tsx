@@ -4,10 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
-import TimelineCard from "@/app/_components/cards/TimelineCard";
+import BaseCard from "@/app/_components/cards/BaseCard";
 import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
 import searchIcon from "@/assets/icons/search.svg";
 import styles from "./SearchBar.module.scss";
+import timeline_1 from "@/assets/images/timeline_1.png";
 
 interface SearchBarProps {
   className?: string;
@@ -157,14 +158,29 @@ const SearchBar: React.FC<SearchBarProps> = ({
                               Timeline Results
                             </h2>
                             <div className={styles.searchDropdownMasonry}>
-                              {timelines.map((item) => (
-                                <Link
-                                  href={`/dashboard/timeline?id=${item.id}`}
-                                  key={`timeline-${item.id}`}
-                                >
-                                  <TimelineCard {...item} variant="compact" />
-                                </Link>
-                              ))}
+                              {timelines.map((item) => {
+                                const imageMap: { [key: string]: any } = {
+                                  "timeline_1.png": timeline_1,
+                                };
+                                const imageSource =
+                                  imageMap[item.image] || timeline_1;
+
+                                return (
+                                  <Link
+                                    href={`/timeline?id=${item.id}`}
+                                    key={`timeline-${item.id}`}
+                                  >
+                                    <BaseCard
+                                      variant="timeline"
+                                      layout="compact"
+                                      image={imageSource}
+                                      imagePosition="top"
+                                      showOverlay={false}
+                                      title={item.title}
+                                    />
+                                  </Link>
+                                );
+                              })}
                             </div>
                           </div>
                         )}

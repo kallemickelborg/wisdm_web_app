@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-import styles from "@/app/(pages)/login/signup/SignUpPage.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
 
 import { copyToClipboard } from "@/app/_lib/helper/clipboard/clipboard";
 import { generatePassword } from "@/app/_lib/user/password/generatePassword";

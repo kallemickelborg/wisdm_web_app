@@ -15,21 +15,21 @@ interface InstructionContent {
 }
 
 const ROUTE_INSTRUCTIONS: Record<string, InstructionContent> = {
-  "/dashboard": {
+  "/home": {
     title: "How to Use",
     instructions: [
       "Scroll sideways for different themes",
       "Scroll down for more posts",
     ],
   },
-  "/dashboard/timeline": {
+  "/timeline": {
     title: "Timeline View",
     instructions: [
       "Click on posts to expand them",
       "Use the navigation bar to switch between dates",
     ],
   },
-  "/dashboard/explore": {
+  "/explore": {
     title: "Explore View",
     instructions: [
       "Explore featured posts based on your interests, trending comments, and trending posts.",
@@ -69,7 +69,7 @@ const InstructionOverlay: React.FC<InstructionOverlayProps> = ({
   const content =
     pathname && ROUTE_INSTRUCTIONS[pathname]
       ? ROUTE_INSTRUCTIONS[pathname]
-      : ROUTE_INSTRUCTIONS["/dashboard"];
+      : ROUTE_INSTRUCTIONS["/home"];
 
   const initialScale = 0.01;
   const screenDiagonal = Math.sqrt(

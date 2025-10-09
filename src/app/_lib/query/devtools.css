@@ -1,0 +1,84 @@
+/**
+ * TanStack Query DevTools Styling
+ * 
+ * Non-intrusive styling to ensure DevTools don't interfere with the main UI
+ */
+
+/* DevTools button positioning and styling */
+[data-testid="tsqd-open-btn-container"] {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 1000 !important;
+  background-color: #0066cc !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  opacity: 0.8 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+[data-testid="react-query-devtools-button"]:hover {
+  opacity: 1 !important;
+  background-color: #0052a3 !important;
+}
+
+/* DevTools panel positioning and styling */
+[data-testid="react-query-devtools-panel"] {
+  position: fixed !important;
+  bottom: 60px !important;
+  left: 20px !important;
+  right: 20px !important;
+  max-height: 40vh !important;
+  z-index: 999 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  background: white !important;
+  border: 1px solid #e1e5e9 !important;
+}
+
+/* Ensure DevTools don't interfere with navigation */
+.navigation-bar,
+.sidebar,
+.main-content {
+  z-index: 1001 !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  [data-testid="react-query-devtools-button"] {
+    bottom: 80px !important; /* Above mobile navigation */
+    right: 10px !important;
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+
+  [data-testid="react-query-devtools-panel"] {
+    bottom: 120px !important;
+    left: 10px !important;
+    right: 10px !important;
+    max-height: 35vh !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  [data-testid="react-query-devtools-button"] {
+    background-color: #1a73e8 !important;
+  }
+
+  [data-testid="react-query-devtools-button"]:hover {
+    background-color: #1557b0 !important;
+  }
+
+  [data-testid="react-query-devtools-panel"] {
+    background: #1f1f1f !important;
+    border-color: #333 !important;
+    color: white !important;
+  }
+}

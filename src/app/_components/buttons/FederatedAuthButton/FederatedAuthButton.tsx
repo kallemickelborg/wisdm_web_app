@@ -1,6 +1,5 @@
-import Image from "next/image"
-
-import styles from '@/app/_components/buttons/FederatedAuthButton/FederatedAuthButton.module.scss'
+import React from "react";
+import BaseButton from "../BaseButton";
 
 interface FederatedAuthButtonProps {
   src: string;
@@ -9,24 +8,25 @@ interface FederatedAuthButtonProps {
   onClick: () => void;
 }
 
-const FederatedAuthButton = ({
+/**
+ * FederatedAuthButton - Authentication button with provider icon
+ * Now uses BaseButton with 'auth' variant
+ */
+const FederatedAuthButton: React.FC<FederatedAuthButtonProps> = ({
   src,
   alt,
   text,
-  onClick
-}: FederatedAuthButtonProps) => {
+  onClick,
+}) => {
   return (
-    <button
-    className={styles.authButton}
-    onClick={onClick}
-    >
-      <Image
-        src={src}
-        alt={alt}
-      />
-      {text}
-    </button>
-  )
-}
+    <BaseButton
+      variant="auth"
+      icon={src}
+      text={text}
+      onClick={onClick}
+      fullWidth
+    />
+  );
+};
 
-export default FederatedAuthButton
+export default FederatedAuthButton;

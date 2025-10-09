@@ -1,0 +1,223 @@
+// Base header container
+.baseHeader {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$gap-medium;
+  width: 100%;
+}
+
+// Header content wrapper
+.headerContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: vars.$gap-medium;
+  width: 100%;
+}
+
+// Title section
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$gap-small;
+  flex: 1;
+
+  h1 {
+    color: vars.$color-brand;
+    @include vars.use-font("bold");
+    font-size: vars.$font-size-header-large;
+    margin: 0;
+    line-height: 1;
+    width: 100%;
+  }
+
+  .subtitle {
+    @include vars.use-font("regular");
+    font-size: vars.$font-size-body-medium;
+    color: vars.$color-font-body;
+    margin: 0;
+  }
+}
+
+// Icon container (for question, settings, etc.)
+.iconContainer {
+  display: flex;
+  gap: vars.$gap-medium;
+  align-items: center;
+
+  .questionIcon,
+  .settingsIcon {
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+    transition: transform vars.$transition-duration-short;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+// Action button (e.g., Edit button)
+.actionButton {
+  padding: vars.$padding-small vars.$padding-medium;
+  border: 0;
+  border-radius: vars.$radius-small;
+  background-color: var(--color-input);
+  color: vars.$color-font-body;
+  cursor: pointer;
+  @include vars.use-font("regular");
+  font-size: vars.$font-size-body-medium;
+  transition: background-color vars.$transition-duration-short,
+    transform vars.$transition-duration-short;
+
+  &:hover {
+    background-color: vars.$color-brand;
+    color: white;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// ============================================
+// VARIANT: Dashboard
+// ============================================
+.variantDashboard {
+  // Default styles already applied
+}
+
+// ============================================
+// VARIANT: Timeline
+// ============================================
+.variantTimeline {
+  padding: vars.$padding-medium;
+  background-color: vars.$color-background;
+  border-bottom: 1px solid var(--color-input-border);
+
+  .timelineHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: vars.$gap-medium;
+    width: 100%;
+  }
+
+  .backButton {
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+    transition: transform vars.$transition-duration-short;
+    align-self: center;
+    display: flex;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .timelineTitle {
+    @include vars.use-font("bold");
+    font-size: vars.$font-size-header-medium;
+    color: vars.$color-brand;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+// ============================================
+// VARIANT: Simple
+// ============================================
+.variantSimple {
+  .headerContent {
+    justify-content: flex-start;
+  }
+
+  h1 {
+    font-size: vars.$font-size-header-medium;
+  }
+}
+
+// ============================================
+// VARIANT: Auth (Onboarding/Authentication)
+// ============================================
+.variantAuth {
+  display: flex;
+  left: 0;
+  margin-top: 4rem;
+  position: absolute;
+  top: 0;
+  width: 100%;
+
+  .authBackButton {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    font-size: vars.$font-size-header-large;
+    left: 20px;
+    top: 20px;
+    position: absolute;
+    transition: transform vars.$transition-duration-short;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .progressIndicator {
+    left: 50%;
+    position: absolute;
+    top: 1rem;
+    transform: translateX(-50%);
+
+    .progressIcon {
+      display: block;
+    }
+  }
+}
+
+// Auth variant logo
+.authLogo {
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  height: auto;
+}
+
+// Auth variant text block
+.authTextBlock {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$gap-small;
+  margin-top: vars.$margin-large;
+  text-align: center;
+
+  h1 {
+    @include vars.use-font(bold);
+    font-size: vars.$font-size-header-medium;
+    color: var(--color-header-font);
+  }
+
+  p {
+    @include vars.use-font(regular);
+    font-size: vars.$font-size-body-medium;
+    color: var(--color-body-font);
+  }
+}

@@ -2,10 +2,11 @@
 
 import React, { useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
-import GettingStartedHeader from "@/app/_components/signUp/gettingStarted/GettingStartedHeaderHeader/GettingStartedHeader";
+import BaseHeader from "@/app/_components/header";
 import GettingStartedForm from "@/app/_components/signUp/gettingStarted/GettingStartedForm/GettingStartedForm";
 import FederatedAuthOptions from "@/app/_components/signUp/gettingStarted/FederatedAuthOptions/FederatedAuthOptions";
 import TermsAndConditions from "@/app/_components/signUp/gettingStarted/TermsAndConditions/TermsAndConditions";
+import progressCircle1 from "@/assets/icons/progress_circle_1.svg";
 import {
   onClickFirebaseEmailPasswordSignUp,
   setField,
@@ -15,7 +16,7 @@ import {
   initialFormReducerState,
 } from "@/app/_components/signUp/gettingStarted/gettingStartedReducer";
 import { SubmitButton } from "@/app/_components/buttons/SubmitButton";
-import styles from "@/app/(pages)/login/signup/SignUpPage.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
 import FederatedAuthButton from "@/app/_components/buttons/FederatedAuthButton/FederatedAuthButton";
 import SuggestedPassword from "@/app/_components/signUp/gettingStarted/SuggestedPassword/SuggestedPassword";
 import LoadingOverlay from "@/app/_components/loading/LoadingOverlay";
@@ -181,45 +182,48 @@ const GettingStartedContainer = () => {
   };
 
   return (
-    <div className={styles.loginContainer}>
-      <LoadingOverlay isVisible={isLoading} />
-      <GettingStartedHeader />
-      <div className={styles.onboardingTextBlock}>
-        <h1>Let's Get Started</h1>
-      </div>
-      <GettingStartedForm
-        formState={formState}
-        setField={(field: string, value: string) =>
-          setField(formDispatch, field, value)
-        }
-      />
-      <div className={styles.orDivider}>
-        <span>OR</span>
-      </div>
-      <div className={styles.authWrapper}>
-        <FederatedAuthButton
-          src={googleIcon}
-          alt="Google Icon"
-          text="Continue with Google"
-          onClick={handleGoogleSignup}
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginContainer}>
+        <LoadingOverlay isVisible={isLoading} />
+        <BaseHeader
+          title="Let's Get Started"
+          variant="auth"
+          backButton={{ href: "/login" }}
         />
-        <FederatedAuthButton
-          src={facebookIcon}
-          alt="Facebook Icon"
-          text="Continue with Facebook"
-          onClick={handleFacebookSignup}
+        <GettingStartedForm
+          formState={formState}
+          setField={(field: string, value: string) =>
+            setField(formDispatch, field, value)
+          }
         />
+        <div className={styles.orDivider}>
+          <span>OR</span>
+        </div>
+        <div className={styles.authWrapper}>
+          <FederatedAuthButton
+            src={googleIcon}
+            alt="Google Icon"
+            text="Continue with Google"
+            onClick={handleGoogleSignup}
+          />
+          <FederatedAuthButton
+            src={facebookIcon}
+            alt="Facebook Icon"
+            text="Continue with Facebook"
+            onClick={handleFacebookSignup}
+          />
+        </div>
+        <TermsAndConditions passwordError={passwordError} />
+
+        {/* Add consolidated error summary before submit button */}
+        <OnboardingErrorSummary
+          formError={formError}
+          fieldErrors={getFieldErrors()}
+          className="errorSummaryContainer"
+        />
+
+        <SubmitButton text="Next" onClick={onClickNextButton} />
       </div>
-      <TermsAndConditions passwordError={passwordError} />
-
-      {/* Add consolidated error summary before submit button */}
-      <OnboardingErrorSummary
-        formError={formError}
-        fieldErrors={getFieldErrors()}
-        className="errorSummaryContainer"
-      />
-
-      <SubmitButton text="Next" onClick={onClickNextButton} />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import TimelineHeader from "@/app/_components/timeline/TimelineHeader";
 import Perspectives from "@/app/_components/timeline/Perspectives";
 import TimelineEvents from "@/app/_components/timeline/TimelineEvents";
-import styles from "@/app/(pages)/dashboard/timeline/Timeline.module.scss";
+import styles from "@/app/(pages)/(dashboard)/timeline/Timeline.module.scss";
 import Image from "next/image";
 import timeline_1 from "@/assets/images/timeline_1.png";
 import TimelinePopup from "@/app/_components/timeline/TimelinePopup";

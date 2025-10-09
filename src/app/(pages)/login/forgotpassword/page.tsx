@@ -1,41 +1,38 @@
 // System Imports
 import Link from "next/link";
-import Image from "next/image";
+
+// Component Imports
+import BaseHeader from "@/app/_components/header";
+import BaseInput from "@/app/_components/inputs/BaseInput";
+import BaseButton from "@/app/_components/buttons/BaseButton";
 
 // Stylesheet Imports
-import styles from "@/app/(pages)/login/forgotpassword/ForgotPasswordPage.module.scss";
-
-// Asset Imports
-import arrowLeftWhite from "@/assets/icons/arrow_left_white.svg";
-import arrowLeftBrand from "@/assets/icons/arrow_left_brand.svg";
+import styles from "@/app/(pages)/login/auth.module.scss";
 
 interface NavigationActions {
   [key: string]: () => void;
 }
 
 const ForgotPasswordPage = ({ login }: NavigationActions) => (
-  <div className={styles.loginContainer}>
-    <div className={styles.onboardingHeader}>
-      <Link href="/login/signin" className={styles.backButton}>
-        <Image src={arrowLeftBrand} />
-      </Link>
-    </div>
-    <div className={styles.onboardingTextBlock}>
-      <h1>Forgot Password?</h1>
-      <p>A verification code will be sent to your email</p>
-    </div>
-    <div className={styles.labelWrapper}>
-      <input type="email" placeholder="Email" />
-    </div>
+  <div className={styles.loginWrapper}>
+    <div className={styles.loginContainer}>
+      <BaseHeader
+        title="Forgot Password?"
+        subtitle="A verification code will be sent to your email"
+        variant="auth"
+        backButton={{ href: "/login/signin" }}
+      />
+      <BaseInput type="email" placeholder="Email" variant="filled" fullWidth />
 
-    <div className={styles.nextWrapper}>
-      <p className={styles.infoText}>
-        By continuing you agree to our <a href="/terms">Terms of Service</a> and{" "}
-        <a href="/privacy">Privacy Policy</a>.
-      </p>
-      <Link href="" className={styles.nextButton}>
-        Next
-      </Link>
+      <div className={styles.nextWrapper}>
+        <p className={styles.infoText}>
+          By continuing you agree to our <a href="/terms">Terms of Service</a>{" "}
+          and <a href="/privacy">Privacy Policy</a>.
+        </p>
+        <BaseButton variant="primary">
+          <Link href="">Next</Link>
+        </BaseButton>
+      </div>
     </div>
   </div>
 );

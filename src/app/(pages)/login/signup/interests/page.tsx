@@ -6,11 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 // Stylesheet Imports
-import styles from "@/app/(pages)/login/signup/interests/InterestsPage.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
+
+// Component Imports
+import BaseHeader from "@/app/_components/header";
 
 // Asset Imports
-import arrowLeftWhite from "@/assets/icons/arrow_left_white.svg";
-import arrowLeftBrand from "@/assets/icons/arrow_left_brand.svg";
 import progressCircle5 from "@/assets/icons/progress_circle_5.svg";
 import tech from "@/assets/images/tech.png";
 
@@ -104,58 +105,59 @@ const InterestsPage = () => {
   };
 
   return (
-    <div className={styles.loginContainer}>
-      <LoadingOverlay isVisible={isLoading} />
-      <div className={styles.onboardingHeader}>
-        <Link href="/login/signup/tags" className={styles.backButton}>
-          <Image src={arrowLeftBrand} alt="back button" />
-        </Link>
-        <Image
-          src={progressCircle5}
-          alt="progress"
-          className={styles.progressCircles}
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginContainer}>
+        <LoadingOverlay isVisible={isLoading} />
+        <BaseHeader
+          title="What are you interested in?"
+          subtitle="Pick 5 to customize your news feed"
+          variant="auth"
+          backButton={{ href: "/login/signup/tags" }}
+          progressIndicator={{
+            current: 5,
+            total: 5,
+            icon: progressCircle5,
+          }}
         />
-      </div>
 
-      <div className={styles.onboardingTextBlock}>
-        <h1>What are you interested in?</h1>
-        <p>Pick 5 to customize your news feed</p>
         <p className={styles.interestCounter}>
           Selected: {selectedInterests.length}/5 (minimum)
         </p>
-      </div>
 
-      <div className={styles.interestsGrid}>
-        {interestArray.map((interest) => (
-          <div
-            key={interest.label}
-            className={`${styles.interestItem} ${
-              selectedInterests.includes(interest.label) ? styles.selected : ""
-            }`}
-            onClick={() => handleInterestClick(interest.label)}
-          >
-            <img src={interest.image} alt={interest.label} />
-            <p>{interest.label}</p>
-          </div>
-        ))}
-      </div>
+        <div className={styles.interestsGrid}>
+          {interestArray.map((interest) => (
+            <div
+              key={interest.label}
+              className={`${styles.interestItem} ${
+                selectedInterests.includes(interest.label)
+                  ? styles.selected
+                  : ""
+              }`}
+              onClick={() => handleInterestClick(interest.label)}
+            >
+              <img src={interest.image} alt={interest.label} />
+              <p>{interest.label}</p>
+            </div>
+          ))}
+        </div>
 
-      <OnboardingErrorSummary
-        formError={formError}
-        fieldErrors={fieldErrors}
-        className="errorSummaryContainer"
-      />
-
-      <div className={styles.nextWrapper}>
-        <SubmitButton
-          text={
-            selectedInterests.length < 5
-              ? `Select ${5 - selectedInterests.length} more`
-              : "Finish"
-          }
-          onClick={handleSubmission}
-          disabled={selectedInterests.length < 5}
+        <OnboardingErrorSummary
+          formError={formError}
+          fieldErrors={fieldErrors}
+          className="errorSummaryContainer"
         />
+
+        <div className={styles.nextWrapper}>
+          <SubmitButton
+            text={
+              selectedInterests.length < 5
+                ? `Select ${5 - selectedInterests.length} more`
+                : "Finish"
+            }
+            onClick={handleSubmission}
+            disabled={selectedInterests.length < 5}
+          />
+        </div>
       </div>
     </div>
   );

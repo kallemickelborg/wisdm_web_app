@@ -9,7 +9,7 @@ import Image from "next/image";
 import { ThemeContext } from "@/app/_contexts/ThemeContext";
 
 // Stylesheet Imports
-import styles from "@/app/(pages)/login/StartScreen.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
 
 // Asset Imports
 import wisdmLogoWhite from "@/assets/logos/wisdm_logo_white.svg";

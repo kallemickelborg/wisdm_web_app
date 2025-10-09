@@ -1,0 +1,224 @@
+// Base container
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  &.fullPage {
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--color-background);
+  }
+}
+
+// Content wrapper
+.content {
+  background-color: var(--color-input);
+  /*   padding: vars.$padding-xlarge; */
+  border-radius: vars.$radius-large;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+// Icon
+.icon {
+  font-size: 48px;
+  margin-bottom: vars.$margin-medium;
+  display: block;
+}
+
+// Title
+.title {
+  @include vars.use-font("bold");
+  font-size: vars.$font-size-header-large;
+  margin-bottom: vars.$margin-medium;
+  color: vars.$color-font-body;
+}
+
+// Message
+.message {
+  @include vars.use-font("thin");
+  font-size: vars.$font-size-body-medium;
+  color: vars.$color-font-body;
+  margin-bottom: vars.$margin-medium;
+  line-height: 1.5;
+}
+
+// Error details
+.details {
+  background-color: var(--color-error-background);
+  border: 1px solid #ff4d4d;
+  border-radius: vars.$radius-medium;
+  padding: vars.$padding-medium;
+  margin-bottom: vars.$margin-large;
+  font-size: vars.$font-size-body-small;
+  color: #ff4d4d;
+  text-align: left;
+
+  p {
+    margin: 0;
+    word-break: break-word;
+  }
+}
+
+// Actions
+.actions {
+  display: flex;
+  gap: vars.$gap-medium;
+  justify-content: center;
+  margin-top: vars.$margin-large;
+}
+
+// Variant: Page (full-page errors like 404, 500)
+.variantPage {
+  .content {
+    padding: vars.$padding-large;
+  }
+
+  .title {
+    font-size: vars.$font-size-header-large;
+  }
+}
+
+// Variant: Inline (errors within content)
+.variantInline {
+  .content {
+    padding: vars.$padding-large;
+    max-width: 100%;
+  }
+
+  .icon {
+    font-size: 32px;
+    margin-bottom: vars.$margin-small;
+  }
+
+  .title {
+    font-size: vars.$font-size-header-medium;
+  }
+}
+
+// Variant: Alert (banner-style errors)
+.variantAlert {
+  width: 100%;
+
+  .content {
+    max-width: 100%;
+    border-radius: vars.$radius-medium;
+    padding: vars.$padding-medium vars.$padding-large;
+    display: flex;
+    align-items: center;
+    gap: vars.$gap-medium;
+    text-align: left;
+    box-shadow: none;
+    border: 1px solid;
+  }
+
+  .icon {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .message {
+    margin: 0;
+    flex: 1;
+  }
+
+  .actions {
+    margin: 0;
+  }
+}
+
+// Variant: Field (form field errors)
+.variantField {
+  .fieldError {
+    display: flex;
+    align-items: center;
+    gap: vars.$gap-small;
+  }
+
+  .message {
+    font-size: vars.$font-size-body-small;
+    color: #ff4d4d;
+    margin: 0;
+    text-align: left;
+  }
+}
+
+// Severity: Error
+.severityError {
+  .title {
+    color: #ff4d4d;
+  }
+
+  &.variantAlert .content {
+    background-color: var(--color-error-background);
+    border-color: #ff4d4d;
+  }
+}
+
+// Severity: Warning
+.severityWarning {
+  .title {
+    color: #ff9800;
+  }
+
+  .details {
+    background-color: var(--color-warning-background);
+    border-color: #ff9800;
+    color: #ff9800;
+  }
+
+  &.variantAlert .content {
+    background-color: var(--color-warning-background);
+    border-color: #ff9800;
+  }
+}
+
+// Severity: Info
+.severityInfo {
+  .title {
+    color: #2196f3;
+  }
+
+  .details {
+    background-color: var(--color-info-background);
+    border-color: #2196f3;
+    color: #2196f3;
+  }
+
+  &.variantAlert .content {
+    background-color: var(--color-info-background);
+    border-color: #2196f3;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .content {
+    padding: vars.$padding-large;
+  }
+
+  .variantPage .content {
+    padding: vars.$padding-large;
+  }
+
+  .title {
+    font-size: vars.$font-size-header-medium;
+  }
+
+  .variantPage .title {
+    font-size: vars.$font-size-header-large;
+  }
+
+  .actions {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}

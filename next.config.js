@@ -4,11 +4,12 @@ const path = require("path");
 const firebaseProjectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
 const nextConfig = {
+  devIndicators: false,
   reactStrictMode: true,
   pageExtensions: ["tsx", "ts", "jsx", "js"],
   sassOptions: {
     includePaths: [path.join(__dirname, "src/styles")],
-    prependData: `@use "@/styles/variables.scss" as vars; @use "@/styles/classes.scss" as classes;`,
+    prependData: `@use "@/styles/variables" as vars;`,
   },
   images: {
     remotePatterns: [

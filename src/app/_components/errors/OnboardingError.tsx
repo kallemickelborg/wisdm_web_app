@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import styles from "./OnboardingError.module.scss";
+import BaseErrorDisplay from "./BaseErrorDisplay";
 
 export type ErrorType = "field" | "alert" | "standard";
 
@@ -11,18 +11,31 @@ interface OnboardingErrorProps {
   className?: string;
 }
 
+/**
+ * OnboardingError - Onboarding form error component
+ * Now uses BaseErrorDisplay with appropriate variant
+ */
 const OnboardingError: React.FC<OnboardingErrorProps> = ({
   message,
   type = "standard",
   className,
 }) => {
   if (!message) return null;
+
+  // Map old type to new variant
+  const variantMap: Record<ErrorType, "field" | "alert" | "inline"> = {
+    field: "field",
+    alert: "alert",
+    standard: "inline",
+  };
+
   return (
-    <div className={`${styles.errorContainer} ${className || ""}`}>
-      <p className={`${styles.errorMessage} ${type ? styles[type] : ""}`}>
-        {message}
-      </p>
-    </div>
+    <BaseErrorDisplay
+      variant={variantMap[type]}
+      severity="error"
+      message={message}
+      className={className}
+    />
   );
 };
 

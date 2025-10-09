@@ -1,81 +1,126 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { io, Socket } from "socket.io-client";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { Socket } from "socket.io-client";
+import { WebSocketManager, ConnectionState } from "./WebSocketManager";
+import { getWebSocketUrl, getFeatureFlags } from "../../_config/categories";
+import { WebSocketErrorBoundary } from "../../_components/errors/ErrorBoundary";
 
-const BASE_API_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
-const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
-const SOCKET_STANDARD = ENVIRONMENT === "production" ? "wss" : "ws";
+// Get configuration-based WebSocket URL and features
+const webSocketUrl = getWebSocketUrl();
+const features = getFeatureFlags();
 
-// WebSocket Initialization (autoConnect: false to prevent immediate connection)
-export const socket: Socket = io(`${SOCKET_STANDARD}://${BASE_API_URL}`, {
+// Create WebSocket Manager instance with configuration
+const webSocketManager = new WebSocketManager({
+  url: webSocketUrl,
+  transports: ["websocket", "polling"],
+  timeout: 20000,
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: 5,
   autoConnect: false,
-  transports: ["websocket"],
 });
 
-// ✅ Context Definition (Make sure it is declared BEFORE using it)
+// Export socket for backward compatibility (initialize first)
+webSocketManager.initialize();
+export const socket: Socket = webSocketManager.getSocket() as Socket;
+
+// ✅ Enhanced Context Definition with WebSocket Manager
 interface WebSocketContextType {
-  socket: Socket;
+  socket: Socket | null;
   isConnected: boolean;
+  connectionState: ConnectionState;
+  webSocketManager: WebSocketManager;
   joinRoom: (room: string) => void;
   leaveRoom: (room: string) => void;
+  connect: () => void;
+  disconnect: () => void;
 }
 
-const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
+const WebSocketContext = createContext<WebSocketContextType | undefined>(
+  undefined
+);
 
-// ✅ Ensure the Provider Returns a ReactNode
-export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+// ✅ Enhanced Provider using WebSocket Manager
+export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionState, setConnectionState] = useState<ConnectionState>(
+    ConnectionState.DISCONNECTED
+  );
 
   useEffect(() => {
     let isMounted = true; // ✅ Prevents state updates on unmounted components
 
-    const connectSocket = () => {
-      if (socket.connected) {
-        console.log("✅ WebSocket already connected.");
-        if (isMounted) setIsConnected(true);
-        return;
+    // Initialize the WebSocket manager
+    webSocketManager.initialize();
+
+    // Subscribe to connection state changes
+    webSocketManager.onConnectionStateChange((state: ConnectionState) => {
+      if (isMounted) {
+        setConnectionState(state);
+        setIsConnected(state === ConnectionState.CONNECTED);
       }
+    });
 
-      console.log("🌐 Connecting to WebSocket...");
-      socket.connect();
-
-      const onConnect = () => {
-        console.log("✅ Connected to WebSocket server.");
-        if (isMounted) setIsConnected(true);
-      };
-
-      const onError = (err: any) => {
-        console.error("❌ WebSocket connection error:", err);
-      };
-
-      socket.once("connect", onConnect);
-      socket.once("connect_error", onError);
-    };
-
-    connectSocket();
+    // Connect to the WebSocket server
+    webSocketManager.connect();
 
     return () => {
       isMounted = false; // ✅ Prevents unnecessary re-renders
-      console.log("🔌 Disconnecting WebSocket...");
-      socket.disconnect();
+      console.log("🔌 Cleaning up WebSocket connection...");
+
+      // Clean disconnect and destroy
+      webSocketManager.disconnect();
     };
   }, []);
 
+  // Enhanced methods using WebSocket Manager
   const joinRoom = (room: string) => {
-    console.log(`📢 Joining room: ${room}`);
-    socket.emit("join_room", { room });
+    webSocketManager.joinRoom(room);
   };
 
   const leaveRoom = (room: string) => {
-    console.log(`📤 Leaving room: ${room}`);
-    socket.emit("leave_room", { room });
+    webSocketManager.leaveRoom(room);
+  };
+
+  const connect = () => {
+    webSocketManager.connect();
+  };
+
+  const disconnect = () => {
+    webSocketManager.disconnect();
   };
 
   return (
-    <WebSocketContext.Provider value={{ socket, isConnected, joinRoom, leaveRoom }}>
-      {children} {/* ✅ Ensures JSX is returned */}
-    </WebSocketContext.Provider>
+    <WebSocketErrorBoundary
+      onWebSocketError={(error) => {
+        console.error("WebSocket Provider Error:", error);
+        // Could trigger reconnection or show user notification
+      }}
+    >
+      <WebSocketContext.Provider
+        value={{
+          socket: webSocketManager.getSocket(),
+          isConnected,
+          connectionState,
+          webSocketManager,
+          joinRoom,
+          leaveRoom,
+          connect,
+          disconnect,
+        }}
+      >
+        {children} {/* ✅ Ensures JSX is returned */}
+      </WebSocketContext.Provider>
+    </WebSocketErrorBoundary>
   );
 };
 

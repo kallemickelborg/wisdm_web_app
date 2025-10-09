@@ -1,5 +1,5 @@
 // System Imports
-import {
+import React, {
   useState,
   useEffect,
   useRef,
@@ -42,54 +42,40 @@ const NavigationBar = () => {
   const pathname = usePathname();
   const notifications = useAppSelector((state) => state.notifications);
 
-  function extractLastSegment(path: string) {
-    const pattern = /\/([^\/?]+)(?=\?|$)/;
-    const match = path.match(pattern);
-    if (match) {
-      if (match[1] === "dashboard" || match[1] === "signIn") {
-        return "home";
-      } else {
-        return match[1];
-      }
-    } else {
-      return null;
-    }
-  }
-
   const isDarkMode = theme === "dark";
 
   const navOptionsArray = [
     {
       name: "home",
-      href: "/",
+      href: "home",
       alt: "Home",
       activeIcon: homeActiveIcon,
       inactiveIcon: isDarkMode ? homeIcon : homeLightMode,
     },
     {
       name: "explore",
-      href: "/explore",
+      href: "explore",
       alt: "Explore",
       activeIcon: exploreActiveIcon,
       inactiveIcon: isDarkMode ? exploreIcon : exploreLightMode,
     },
     {
       name: "profile",
-      href: "/profile",
+      href: "profile",
       alt: "Profile",
       activeIcon: profileActiveIcon,
       inactiveIcon: isDarkMode ? profileIcon : profileLightMode,
     },
     {
       name: "vote",
-      href: "/vote",
+      href: "vote",
       alt: "Vote",
       activeIcon: voteActiveIcon,
       inactiveIcon: isDarkMode ? voteIcon : voteLightMode,
     },
     {
       name: "notifications",
-      href: "/notifications",
+      href: "notifications",
       alt: "Notifications",
       activeIcon: notificationsActiveIcon,
       inactiveIcon: isDarkMode ? notificationsIcon : notificationsLightMode,
@@ -128,7 +114,7 @@ const NavigationBar = () => {
     inactiveIcon: StaticImageData
   ) => (
     <Link
-      href={`/dashboard${href}`}
+      href={`/${href}`}
       key={name}
       data-name={name}
       className={`${styles.navbarItem} ${
@@ -174,8 +160,7 @@ const NavigationBar = () => {
 
   useEffect(() => {
     if (pathname) {
-      const newView = extractLastSegment(pathname);
-      setCurrentView(newView);
+      setCurrentView(pathname);
     }
   }, [pathname]);
 
@@ -230,4 +215,5 @@ const NavigationBar = () => {
   );
 };
 
-export default NavigationBar;
+// Memoize the NavigationBar to prevent unnecessary re-renders
+export default React.memo(NavigationBar);

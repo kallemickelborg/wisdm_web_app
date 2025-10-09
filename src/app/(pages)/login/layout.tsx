@@ -5,7 +5,7 @@ import React, { ReactNode } from "react";
 import ThemeToggle from "@/app/_components/buttons/ThemeToggle";
 
 // Stylesheet Imports
-import styles from "@/app/(pages)/login/StartScreen.module.scss";
+import styles from "@/app/(pages)/login/auth.module.scss";
 import themeToggleStyles from "@/app/_components/buttons/ThemeToggle.module.scss";
 
 interface LayoutProps {

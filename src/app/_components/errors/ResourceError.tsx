@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import styles from "./ErrorBoundary.module.scss";
+import BaseErrorDisplay from "./BaseErrorDisplay";
 
 interface ResourceErrorProps {
   message?: string;
@@ -9,6 +9,10 @@ interface ResourceErrorProps {
   retry?: () => void;
 }
 
+/**
+ * ResourceError - Resource loading error component
+ * Now uses BaseErrorDisplay with 'page' variant
+ */
 const ResourceError: React.FC<ResourceErrorProps> = ({
   message = "Failed to load resource",
   error = null,
@@ -19,27 +23,26 @@ const ResourceError: React.FC<ResourceErrorProps> = ({
   };
 
   return (
-    <div className={styles.errorBoundaryWrapper}>
-      <div className={styles.errorBoundaryContainer}>
-        <h1>Something went wrong</h1>
-        <p>{message}</p>
-        {error && (
-          <div className={styles.errorDetails}>
-            <p>{error.message || "Unknown error"}</p>
-          </div>
-        )}
-        <div className={styles.buttonContainer}>
-          <button className={styles.backButton} onClick={handleGoBack}>
-            Go Back
-          </button>
-          {retry && (
-            <button className={styles.retryButton} onClick={retry}>
-              Try Again
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+    <BaseErrorDisplay
+      variant="page"
+      severity="error"
+      title="Something went wrong"
+      message={message}
+      errorDetails={error || undefined}
+      primaryAction={
+        retry
+          ? {
+              label: "Try Again",
+              onClick: retry,
+            }
+          : undefined
+      }
+      secondaryAction={{
+        label: "Go Back",
+        onClick: handleGoBack,
+      }}
+      fullPage
+    />
   );
 };
 

@@ -89,6 +89,7 @@ main {
   color: vars.$color-font-body;
   margin: 0;
   padding: 0;
+  align-items: center;
 }
 
 * {
@@ -151,7 +152,6 @@ a {
 }
 
 span {
-  @include vars.use-font("thin");
   font-size: vars.$font-size-body-medium;
   color: vars.$color-font-body;
 }

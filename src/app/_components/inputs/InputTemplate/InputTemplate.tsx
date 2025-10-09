@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
-
-import styles from "src/app/(pages)/login/signup/SignUpPage.module.scss";
+import BaseInput from "../BaseInput";
 
 interface InputProps {
   id: string;
@@ -19,6 +18,12 @@ interface InputProps {
   children?: ReactNode;
 }
 
+/**
+ * InputTemplate - Form input wrapper component
+ * Now uses BaseInput for consistent styling and behavior
+ *
+ * @deprecated Consider using BaseInput directly for new implementations
+ */
 const InputTemplate: React.FC<InputProps> = ({
   id,
   type,
@@ -36,20 +41,25 @@ const InputTemplate: React.FC<InputProps> = ({
   children,
 }) => {
   return (
-    <div key={id} className={styles.containerClass}>
-      <input
-        id={id}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onClick={onClick}
-        onChange={onChange}
-        onBlur={onBlur}
-        className={inputClass}
-      />
-      {children && children}
-    </div>
+    <BaseInput
+      id={id}
+      name={name}
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onClick={onClick}
+      onChange={onChange}
+      onBlur={onBlur}
+      label={text}
+      errorMessage={errorMessage}
+      error={!!errorMessage}
+      inputClassName={inputClass}
+      labelClassName={labelClass}
+      variant="filled"
+      fullWidth
+    >
+      {children}
+    </BaseInput>
   );
 };
 

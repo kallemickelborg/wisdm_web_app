@@ -1,6 +1,6 @@
 @use "sass:color";
 @use "sass:map";
-@use "@/styles/variables.scss" as vars;
+@use "@/styles/variables" as vars;
 
 // PAGE CLASSES
 .pageContainer {
@@ -155,33 +155,8 @@
   }
 }
 
-.backButton {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  font-size: vars.$font-size-header-large;
-  left: 20px;
-  top: 20px;
-  position: absolute;
-}
-
-.onboardingHeader {
-  display: flex;
-  left: 0;
-  margin-top: 4rem;
-  position: absolute;
-  top: 0;
-  width: 100%;
-
-  .progressCircles {
-    left: 50%;
-    position: absolute;
-    top: 1rem;
-    transform: translateX(-50%);
-  }
-}
+// Deprecated: Auth header styles moved to BaseHeader component with variant="auth"
+// .backButton and .onboardingHeader are now handled by BaseHeader.module.scss
 
 .labelWrapper {
   display: flex;

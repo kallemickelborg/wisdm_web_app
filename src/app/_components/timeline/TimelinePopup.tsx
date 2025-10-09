@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import styles from "./TimelinePopup.module.scss";
-import SourceCard from "@/app/_components/cards/SourceCard";
+import BaseCard from "@/app/_components/cards/BaseCard";
 import { TimelinePopupProps } from "@/types";
 
 export type TimelineEvent = {
@@ -43,33 +43,40 @@ const TimelinePopup: React.FC<TimelinePopupProps> = ({
     }
   };
 
-  const renderSourceWithLink = (source: any) => (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.3,
-        type: "tween",
-        ease: "easeOut",
-      }}
-    >
-      <SourceCard
-        title={source.title}
-        author={source.author}
-        publication={source.publication}
-        date={source.date}
-        url={source.url}
-        imageUrl={source.image_url}
-        variant={
-          activeTab === "left"
-            ? "left"
-            : activeTab === "right"
-            ? "right"
-            : "default"
-        }
-      />
-    </motion.div>
-  );
+  const renderSourceWithLink = (source: any) => {
+    const handleClick = () => {
+      if (source.url) {
+        window.open(source.url, "_blank", "noopener,noreferrer");
+      }
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.3,
+          type: "tween",
+          ease: "easeOut",
+        }}
+      >
+        <BaseCard
+          variant="source"
+          image={source.image_url}
+          imagePosition="background"
+          showOverlay={true}
+          title={source.title}
+          metadata={{
+            author: source.author,
+            publication: source.publication,
+            date: source.date,
+          }}
+          onClick={source.url ? handleClick : undefined}
+          animate={false}
+        />
+      </motion.div>
+    );
+  };
 
   return (
     <AnimatePresence mode="wait">

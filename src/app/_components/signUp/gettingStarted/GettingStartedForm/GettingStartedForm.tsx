@@ -1,10 +1,18 @@
 import React from "react";
 import InputTemplate from "@/app/_components/inputs/InputTemplate/InputTemplate";
 import SuggestedPassword from "@/app/_components/signUp/gettingStarted/SuggestedPassword/SuggestedPassword";
-import { handleChange, passwordErrorLogic } from "@/app/_components/signUp/gettingStarted/gettingStartedHelper";
-import styles from "@/app/(pages)/login/signup/SignUpPage.module.scss";
+import {
+  handleChange,
+  passwordErrorLogic,
+} from "@/app/_components/signUp/gettingStarted/gettingStartedHelper";
 
-const GettingStartedForm = ({ formState, setField }: {formState: any, setField: any}) => {
+const GettingStartedForm = ({
+  formState,
+  setField,
+}: {
+  formState: any;
+  setField: any;
+}) => {
   const {
     email,
     password,
@@ -45,26 +53,36 @@ const GettingStartedForm = ({ formState, setField }: {formState: any, setField: 
   ];
 
   return (
-    <div className={styles.labelWrapper}>
+    <>
       {inputArray.map((item) => {
-        const {id, type, value, text, placeholder, errorMessage, onChange, onChangeParameters} = item
+        const {
+          id,
+          type,
+          value,
+          text,
+          placeholder,
+          errorMessage,
+          onChange,
+          onChangeParameters,
+        } = item;
         return (
-        <InputTemplate
-          key={id}
-          id={id}
-          name={id}
-          type={type}
-          value={value}
-          text={text}
-          placeholder={placeholder}
-          errorMessage={errorMessage}
-          onChange={(e) =>
-            handleChange(e, setField, onChange, onChangeParameters)
-          }
-        >
-          {item.children}
-        </InputTemplate>
-      )})}
+          <InputTemplate
+            key={id}
+            id={id}
+            name={id}
+            type={type}
+            value={value}
+            text={text}
+            placeholder={placeholder}
+            errorMessage={errorMessage}
+            onChange={(e) =>
+              handleChange(e, setField, onChange, onChangeParameters)
+            }
+          >
+            {item.children}
+          </InputTemplate>
+        );
+      })}
       {password && (
         <InputTemplate
           id="duplicatePassword"
@@ -74,10 +92,12 @@ const GettingStartedForm = ({ formState, setField }: {formState: any, setField: 
           text="Verify Password"
           placeholder="Re-enter Password"
           errorMessage={duplicatePasswordError}
-          onChange={(e) => handleChange(e, setField, passwordErrorLogic, password)}
+          onChange={(e) =>
+            handleChange(e, setField, passwordErrorLogic, password)
+          }
         />
       )}
-    </div>
+    </>
   );
 };
 
