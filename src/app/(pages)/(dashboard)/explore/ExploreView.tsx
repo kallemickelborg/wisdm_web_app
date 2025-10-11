@@ -10,6 +10,7 @@ import { motion, useAnimation, useMotionValue } from "motion/react";
 import { Comment } from "@/types";
 import { useAppDispatch } from "@/redux_lib/hooks";
 import { apiHTTPWrapper } from "@/redux_lib/features/authSlice";
+import { useAuth } from "@/app/_lib/auth/useAuth";
 
 // Component Imports
 import BaseCard from "@/app/_components/cards/BaseCard";
@@ -38,6 +39,7 @@ import { useLoadingState } from "@/hooks/useLoadingState";
 
 const ExploreView = () => {
   const dispatch = useAppDispatch();
+  const { idToken } = useAuth();
   const featuredTimelines = [
     { id: 1, image: featuredImage1, title: "Timeline 1" },
     { id: 2, image: featuredImage2, title: "Timeline 2" },
@@ -80,6 +82,7 @@ const ExploreView = () => {
           apiHTTPWrapper({
             url: `${API_BASE_URL}/comments/get_trending`,
             options: { method: "GET" },
+            idToken: idToken || undefined,
           })
         );
         if (response.payload?.comments) {
@@ -93,7 +96,7 @@ const ExploreView = () => {
     };
 
     fetchTrendingComments();
-  }, [dispatch]);
+  }, [dispatch, idToken]);
 
   useEffect(() => {
     setTimeout(() => {

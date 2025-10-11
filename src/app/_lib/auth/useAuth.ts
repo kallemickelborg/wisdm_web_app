@@ -60,7 +60,8 @@ async function fetchUserProfile(idToken: string): Promise<UserProfile> {
   }
 
   const data = await response.json();
-  return data.user;
+  // Backend returns user data directly, not nested in a 'user' field
+  return data;
 }
 
 /**
@@ -248,18 +249,30 @@ export function useUserProfile(): UserProfileState & {
     refetch,
   } = useQuery({
     queryKey: queryKeys.user.profile(),
-    queryFn: () => fetchUserProfile(idToken!),
+    queryFn: async () => {
+      const data = await fetchUserProfile(idToken!);
+      // Cache profile data locally after successful fetch
+      if (data) {
+        userProfileStorage.saveUserProfile(data);
+      }
+      return data;
+    },
     enabled: isAuthenticated && !!idToken,
     ...cacheConfig.user,
-    onSuccess: (data) => {
-      // Cache profile data locally
-      userProfileStorage.saveUserProfile(data);
-    },
     initialData: () => {
       // Try to get cached profile data
-      return userProfileStorage.getUserProfile();
+      const cached = userProfileStorage.getUserProfile();
+      console.log("useUserProfile - initialData from localStorage:", cached);
+      return cached;
     },
   });
+
+  // Debug: Log profile data
+  useEffect(() => {
+    console.log("useUserProfile - profile:", profile);
+    console.log("useUserProfile - isLoading:", isLoading);
+    console.log("useUserProfile - error:", error);
+  }, [profile, isLoading, error]);
 
   const updateProfile = useCallback(
     (updates: Partial<UserProfile>) => {

@@ -19,10 +19,12 @@ import styles from "@/app/(pages)/(dashboard)/profile/Profile.module.scss";
 import placeholderAvatar from "@/assets/icons/user_avatar.svg";
 
 // Redux imports
-import { useAppSelector, useAppDispatch } from "@/redux_lib/hooks";
-import { RootState } from "@/redux_lib/store";
+import { useAppDispatch } from "@/redux_lib/hooks";
 import { apiHTTPWrapper } from "@/redux_lib/features/authSlice";
 import { useLoadingState } from "@/hooks/useLoadingState";
+
+// Auth imports
+import { useAuth, useUserProfile } from "@/app/_lib/auth/useAuth";
 
 interface UserState {
   username: string | null;
@@ -50,13 +52,20 @@ interface UserTraitsResponse {
 }
 
 const ProfileView: React.FC = () => {
-  const user = useAppSelector((state: RootState) => state.user);
+  const { profile: user, isLoading: profileLoading } = useUserProfile();
+  const { idToken } = useAuth();
   const dispatch = useAppDispatch();
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState("comments");
   const [userTraits, setUserTraits] = useState<UserTrait[]>([]);
   const [comments, setComments] = useState<any[]>([]);
   const { isLoading, setLoaded } = useLoadingState(["userTraits", "comments"]);
+
+  // Debug: Log user profile data
+  useEffect(() => {
+    console.log("ProfileView - user profile:", user);
+    console.log("ProfileView - profileLoading:", profileLoading);
+  }, [user, profileLoading]);
 
   useEffect(() => {
     const fetchUserTraits = async () => {
@@ -78,6 +87,7 @@ const ProfileView: React.FC = () => {
             options: {
               method: "GET",
             },
+            idToken: idToken || undefined,
           })
         );
 
@@ -100,7 +110,7 @@ const ProfileView: React.FC = () => {
     };
 
     fetchUserTraits();
-  }, [user?.username, dispatch]);
+  }, [user?.username, dispatch, idToken]);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -117,6 +127,7 @@ const ProfileView: React.FC = () => {
           apiHTTPWrapper({
             url: commentsUrl,
             options: { method: "GET" },
+            idToken: idToken || undefined,
           })
         );
         console.log("Comments response:", commentsResponse);
@@ -136,7 +147,7 @@ const ProfileView: React.FC = () => {
     };
 
     fetchComments();
-  }, [user?.username, dispatch]);
+  }, [user?.username, dispatch, idToken]);
 
   const getTraitClassName = (trait: string) => {
     const formattedTrait = "active" + trait.replace(/[\s-]/g, "");
@@ -182,7 +193,11 @@ const ProfileView: React.FC = () => {
             />
           </div>
           <div className={styles.userInfo}>
-            <h2>{user?.username || "Loading..."}</h2>
+            <h2>
+              {user?.name ||
+                user?.username ||
+                (profileLoading ? "Loading..." : "No name")}
+            </h2>
             <p>Joined {joinedDate}</p>
             <div className={styles.tagContainer}>
               {userTraits.map((trait, index) => (

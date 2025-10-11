@@ -72,84 +72,86 @@ const VoteView = () => {
                   />
                   <div className={cardStyles.overlay}></div>
                 </motion.div>
-                <AnimatePresence mode="wait">
-                  {cardState === "idle" && (
-                    <motion.h2
-                      key="title"
-                      initial={{ opacity: 1 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {item.title}
-                    </motion.h2>
-                  )}
-                  {cardState === "revealed" && (
-                    <motion.div
-                      key="reveal"
-                      initial={{ opacity: 0, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={cardStyles.voteContainer}
-                    >
-                      <motion.button
-                        className={cardStyles.voteButton}
-                        whileTap={{ scale: 1.2 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVoteClick(true);
-                        }}
+                <div className={cardStyles.cardContent}>
+                  <AnimatePresence mode="wait">
+                    {cardState === "idle" && (
+                      <motion.h2
+                        key="title"
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        👍
-                      </motion.button>
-                      <motion.h4 className={cardStyles.cardBody}>
-                        {item.description}
-                      </motion.h4>
-                      <motion.button
-                        className={cardStyles.voteButton}
-                        whileTap={{ scale: 1.2 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVoteClick(false);
-                        }}
+                        {item.title}
+                      </motion.h2>
+                    )}
+                    {cardState === "revealed" && (
+                      <motion.div
+                        key="reveal"
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={cardStyles.voteContainer}
                       >
-                        👎
-                      </motion.button>
-                    </motion.div>
-                  )}
-                  {cardState === "voted" && votedValue !== null && (
-                    <motion.div
-                      key="voted"
-                      initial={{ opacity: 0, scale: 0.7 }}
-                      animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className={cardStyles.voteFinishedContainer}
-                    >
-                      <motion.span
-                        initial={{ y: votedValue ? 40 : -40, scale: 0.8 }}
-                        animate={{ y: 0, scale: 1 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 15,
-                        }}
-                        style={{ fontSize: "48px", lineHeight: "1" }}
+                        <motion.button
+                          className={cardStyles.voteButton}
+                          whileTap={{ scale: 1.2 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVoteClick(true);
+                          }}
+                        >
+                          👍
+                        </motion.button>
+                        <motion.h4 className={cardStyles.cardBody}>
+                          {item.description}
+                        </motion.h4>
+                        <motion.button
+                          className={cardStyles.voteButton}
+                          whileTap={{ scale: 1.2 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVoteClick(false);
+                          }}
+                        >
+                          👎
+                        </motion.button>
+                      </motion.div>
+                    )}
+                    {cardState === "voted" && votedValue !== null && (
+                      <motion.div
+                        key="voted"
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className={cardStyles.voteFinishedContainer}
                       >
-                        {votedValue ? "👍" : "👎"}
-                      </motion.span>
-                      <motion.h4
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.4 }}
-                      >
-                        You voted {votedValue ? "thumbs up" : "thumbs down"} to
-                        "{item.title}"
-                      </motion.h4>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                        <motion.span
+                          initial={{ y: votedValue ? 40 : -40, scale: 0.8 }}
+                          animate={{ y: 0, scale: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 15,
+                          }}
+                          style={{ fontSize: "48px", lineHeight: "1" }}
+                        >
+                          {votedValue ? "👍" : "👎"}
+                        </motion.span>
+                        <motion.h4
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2, duration: 0.4 }}
+                        >
+                          You voted {votedValue ? "thumbs up" : "thumbs down"}{" "}
+                          to "{item.title}"
+                        </motion.h4>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </BaseCard>
             );
           };

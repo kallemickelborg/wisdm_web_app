@@ -49,7 +49,7 @@
     width: 20%;
     color: var(--color-icon);
     text-align: center;
-    transition: transform 0.5s ease, color 0.5s ease;
+    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
     position: relative;
     outline: none;
     z-index: 1001;
@@ -58,11 +58,12 @@
       width: 36px;
       height: 36px;
       margin-bottom: 5px;
-      transition: filter 0.5s ease, transform 0.5s ease;
+      transition: filter 0.3s ease-in-out, transform 0.3s ease-in-out,
+        width 0.3s ease-in-out, height 0.3s ease-in-out;
     }
 
     span {
-      transition: color 0.5s ease;
+      transition: color 0.3s ease-in-out, margin-top 0.3s ease-in-out;
       white-space: nowrap;
     }
 
@@ -78,7 +79,6 @@
     img {
       filter: brightness(1.2);
       transform: scale(1);
-      transition: filter 0.3s ease-in-out, transform 0.3s ease-in-out;
       z-index: 2;
       height: auto;
       width: auto;
@@ -91,7 +91,6 @@
 
   .navbarCircle,
   .navbarInnerCircle {
-    transition: 0.3s ease-in-out;
     width: 50px;
     height: 50px;
     padding: vars.$padding-small;
@@ -104,6 +103,7 @@
     position: fixed;
     bottom: 48px;
     left: -10%;
+    transition: left 0.3s ease-in-out, bottom 0.3s ease-in-out;
   }
 
   .navbarInnerCircle {
@@ -112,6 +112,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    transition: none;
   }
 
   .navbarEllipse {

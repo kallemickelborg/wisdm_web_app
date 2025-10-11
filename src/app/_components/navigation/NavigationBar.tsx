@@ -160,12 +160,26 @@ const NavigationBar = () => {
 
   useEffect(() => {
     if (pathname) {
-      setCurrentView(pathname);
+      // Extract the route name from the pathname (e.g., "/dashboard/home" -> "home")
+      const routeName =
+        pathname.split("/").pop() || pathname.split("/").filter(Boolean).pop();
+
+      // Check if the route name matches any nav option
+      const matchingRoute = navOptionsArray.find(
+        (item) => item.name === routeName
+      );
+
+      if (matchingRoute && routeName) {
+        setCurrentView(routeName);
+      }
     }
   }, [pathname]);
 
   useLayoutEffect(() => {
-    updateCirclePosition(6);
+    // Small delay to ensure DOM is ready and ref is attached
+    const timer = setTimeout(() => {
+      updateCirclePosition(6);
+    }, 0);
 
     const handleResize = () => {
       updateCirclePosition(-10);
@@ -173,6 +187,7 @@ const NavigationBar = () => {
 
     window.addEventListener("resize", handleResize);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("resize", handleResize);
     };
   }, [currentView]);

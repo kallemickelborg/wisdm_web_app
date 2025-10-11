@@ -157,6 +157,15 @@ const BaseCard: React.FC<BaseCardProps> = ({
     );
   };
 
+  // Special handling for vote variant - children contain both image and content
+  if (variant === "vote") {
+    return (
+      <Container className={cardClasses} onClick={onClick} {...containerProps}>
+        {children}
+      </Container>
+    );
+  }
+
   return (
     <Container className={cardClasses} onClick={onClick} {...containerProps}>
       {/* Image (background or top) */}
