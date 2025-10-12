@@ -6,12 +6,6 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, useAnimation, useMotionValue } from "motion/react";
 
-// API/Database Imports
-import { Comment } from "@/types";
-import { useAppDispatch } from "@/redux_lib/hooks";
-import { apiHTTPWrapper } from "@/redux_lib/features/authSlice";
-import { useAuth } from "@/app/_lib/auth/useAuth";
-
 // Component Imports
 import BaseCard from "@/app/_components/cards/BaseCard";
 import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
@@ -34,12 +28,14 @@ import featuredImage4 from "@/assets/images/explore_feed_4.png";
 import featuredImage5 from "@/assets/images/explore_feed_5.png";
 import featuredImage6 from "@/assets/images/explore_feed_6.png";
 
-// Custom Hooks
-import { useLoadingState } from "@/hooks/useLoadingState";
+// Hooks
+import { useTrendingComments } from "@/app/_lib/hooks";
 
 const ExploreView = () => {
-  const dispatch = useAppDispatch();
-  const { idToken } = useAuth();
+  // Fetch trending comments using TanStack Query hook
+  const { data: trendingComments = [], isLoading: trendingLoading } =
+    useTrendingComments(10);
+
   const featuredTimelines = [
     { id: 1, image: featuredImage1, title: "Timeline 1" },
     { id: 2, image: featuredImage2, title: "Timeline 2" },
@@ -60,8 +56,6 @@ const ExploreView = () => {
     x: number;
     y: number;
   } | null>(null);
-  const [trendingComments, setTrendingComments] = useState<Comment[]>([]);
-  const { isLoading, setLoaded } = useLoadingState(["trending", "featured"]);
 
   const toggleOverlay = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isOverlayVisible) {
@@ -74,35 +68,8 @@ const ExploreView = () => {
   const x = useMotionValue(0);
   const xRef = useRef(0);
 
-  useEffect(() => {
-    const fetchTrendingComments = async () => {
-      try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
-        const response = await dispatch(
-          apiHTTPWrapper({
-            url: `${API_BASE_URL}/comments/get_trending`,
-            options: { method: "GET" },
-            idToken: idToken || undefined,
-          })
-        );
-        if (response.payload?.comments) {
-          setTrendingComments(response.payload.comments);
-        }
-      } catch (error) {
-        console.error("Error fetching trending comments:", error);
-      } finally {
-        setLoaded("trending");
-      }
-    };
-
-    fetchTrendingComments();
-  }, [dispatch, idToken]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setLoaded("featured");
-    }, 1000);
-  }, []);
+  // Combined loading state
+  const isLoading = trendingLoading;
 
   useEffect(() => {
     if (containerRef) {

@@ -4,10 +4,9 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { useAppDispatch, useAppSelector } from "@/redux_lib/hooks";
-import { RootState } from "@/redux_lib/store";
-import { updateCurrentChannel } from "@/redux_lib/features/userSlice";
+import { useWebSocketChannel } from "@/app/_contexts/WebSocketChannelContext";
 import { standardizePersonalRoomName } from "@/app/_lib/user/name/general";
+import { useUserProfile } from "@/app/_lib/hooks";
 
 // API/Database Imports
 import {
@@ -38,15 +37,11 @@ const Timeline = () => {
   );
   const searchParams = useSearchParams();
   const timelineId: string = searchParams?.get("id") || "";
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state: RootState) => state.user);
+  const { setCurrentChannel } = useWebSocketChannel();
+  const { data: user } = useUserProfile();
 
   const handleBackClick = () => {
-    dispatch(
-      updateCurrentChannel({
-        current_channel: standardizePersonalRoomName(user.username),
-      })
-    );
+    setCurrentChannel(standardizePersonalRoomName(user?.username || ""));
   };
 
   // Using the type from the central types file
@@ -91,13 +86,10 @@ const Timeline = () => {
   }, [timelineId]);
 
   useEffect(() => {
-    timelineId &&
-      dispatch(
-        updateCurrentChannel({
-          current_channel: timelineId,
-        })
-      );
-  }, [timelineId]);
+    if (timelineId) {
+      setCurrentChannel(timelineId);
+    }
+  }, [timelineId, setCurrentChannel]);
 
   const customEventClickHandler = (event: any, e: React.MouseEvent) => {
     const eventElement = e.currentTarget as HTMLElement;

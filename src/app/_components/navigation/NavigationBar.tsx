@@ -9,7 +9,9 @@ import React, {
 import { usePathname } from "next/navigation";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
-import { useAppSelector } from "@/redux_lib/hooks";
+
+// Hooks
+import { useUnreadNotificationCount } from "@/app/_lib/hooks";
 
 // Context Imports
 import { ThemeContext } from "@/app/_contexts/ThemeContext";
@@ -40,7 +42,9 @@ const NavigationBar = () => {
   const elementRef = useRef<HTMLImageElement | null>(null);
   const { theme, toggleTheme } = useContext(ThemeContext);
   const pathname = usePathname();
-  const notifications = useAppSelector((state) => state.notifications);
+
+  // Use TanStack Query hook for unread notification count
+  const { data: unreadCount = 0 } = useUnreadNotificationCount();
 
   const isDarkMode = theme === "dark";
 
@@ -83,16 +87,11 @@ const NavigationBar = () => {
   ];
 
   const unreadNotificationCounter = () => {
-    const count = Object.values(notifications).reduce(
-      (previousValue, currentValue) =>
-        !currentValue.is_read ? (previousValue += 1) : previousValue,
-      0
-    );
-    return (
-      count > 0 && (
+    if (unreadCount > 0) {
+      return (
         <div
           className={`
-          ${styles.notificationCountContainer} 
+          ${styles.notificationCountContainer}
           ${
             currentView === "notifications"
               ? styles.notificationCountContainerSelected
@@ -100,10 +99,10 @@ const NavigationBar = () => {
           }
         `}
         >
-          {count}
+          <span>{unreadCount}</span>
         </div>
-      )
-    );
+      );
+    }
   };
 
   const navOption = (

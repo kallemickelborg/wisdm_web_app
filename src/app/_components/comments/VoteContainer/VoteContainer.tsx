@@ -5,53 +5,52 @@ import upVote from "@/assets/icons/upvote.svg";
 import upVoteFill from "@/assets/icons/upvote_fill.svg";
 import styles from "@/app/_components/comments/VoteContainer/VoteContainer.module.scss";
 
-import { useAppDispatch } from "@/redux_lib/hooks";
-import { apiSocketWrapper } from "@/redux_lib/features/authSlice";
+import { useAuth } from "@/app/_lib/hooks/useAuth";
 import { socket } from "@/app/_lib/socket/socket";
 
 import { Comment } from "@/types";
 import { CommentActions } from "../CommentContainer/commentReducer";
-import { standardizedPath } from "@/app/_lib/helper/navigation/path";
+import { standardizedPath } from "@/app/_lib/utils/path";
 
 interface VoteContainerProps {
   threadId: string;
   comment: Comment;
-  commentDispatch: Dispatch<CommentActions>
+  commentDispatch: Dispatch<CommentActions>;
 }
 
-const VoteContainer: React.FC<VoteContainerProps> = ({ threadId, comment, commentDispatch }) => {
-  const dispatch = useAppDispatch();
+const VoteContainer: React.FC<VoteContainerProps> = ({
+  threadId,
+  comment,
+  commentDispatch,
+}) => {
+  const { idToken } = useAuth();
   const { vote, vote_count, id, is_vote_bouncing } = comment;
 
-  const path = standardizedPath()
+  const path = standardizedPath();
 
   const updateIsVoteBouncing = (isBouncing: boolean, comment: Comment) => {
-    const newComment = {...comment, is_vote_bouncing: isBouncing}
+    const newComment = { ...comment, is_vote_bouncing: isBouncing };
     commentDispatch({
-      type: 'updateComment', 
+      type: "updateComment",
       payload: {
-        comment: newComment
-      }
-    })
-  }
+        comment: newComment,
+      },
+    });
+  };
 
   const onClickUpdateVote = (e: React.MouseEvent, newValue: boolean | null) => {
     e.preventDefault();
     if (!is_vote_bouncing) {
-      updateIsVoteBouncing(true, comment)
-      dispatch(
-        apiSocketWrapper({
-          cb: (args: object) => {
-            socket.emit("send_vote_update", args);
-          },
-          args: {
-            room: threadId,
-            vote: newValue,
-            comment,
-            path: path
-          },
-        })
-      );
+      updateIsVoteBouncing(true, comment);
+      if (socket) {
+        socket.emit("send_vote_update", {
+          room: threadId,
+          vote: newValue,
+          comment,
+          path: path,
+          token: idToken,
+        });
+      }
     }
   };
   return (

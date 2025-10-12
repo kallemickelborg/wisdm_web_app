@@ -1,64 +1,49 @@
 /**
  * Timeline Data Hooks using TanStack Query
- * Simplified to only include actively used functions
+ *
+ * Provides hooks for timeline-related data fetching and mutations:
+ * - Fetching timelines by category
+ * - Fetching timeline details
+ * - Creating and updating timelines
+ * - Featured and trending timelines
  */
 
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "../auth/useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { timelineService } from "@/services";
 import { queryKeys, cacheConfig } from "../query/QueryProvider";
-import { buildTimelineCategoryUrl } from "../../_config/categories";
+import type {
+  Timeline,
+  TimelineWithDetails,
+  TimelineFilters,
+  CreateTimelineRequest,
+  UpdateTimelineRequest,
+} from "@/models";
 
 /**
- * Timeline interface - simplified to only required fields
+ * Hook to fetch timelines by category
+ * @param categoryId - Category identifier
+ * @param filters - Optional filters
  */
-export interface Timeline {
-  id: string;
-  parent_id: string;
-  title: string;
-  image: string;
-  summary?: string;
-  methodology?: string;
-  topic_statement?: string;
-  category_id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-/**
- * Fetch timelines by category
- */
-async function fetchTimelinesByCategory(
+export function useTimelinesByCategory(
   categoryId: string,
-  idToken: string
-): Promise<Timeline[]> {
-  const url = buildTimelineCategoryUrl(categoryId);
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-      "Content-Type": "application/json",
-    },
+  filters?: TimelineFilters
+) {
+  return useQuery({
+    queryKey: [...queryKeys.timelines.byCategory(categoryId), filters],
+    queryFn: () =>
+      timelineService.fetchTimelinesByCategory(categoryId, filters),
+    enabled: !!categoryId,
+    ...cacheConfig.timelines,
   });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch timelines for category ${categoryId}: ${response.status}`
-    );
-  }
-
-  const data = await response.json();
-  return data.timelines || [];
 }
 
 /**
  * Hook to fetch multiple categories at once
- * This is the only hook actually being used in the application
+ * This is used in the home page to fetch all category timelines
  */
 export function useMultipleCategoryTimelines(categoryIds: string[]) {
-  const { idToken, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
   return useQuery({
@@ -66,7 +51,7 @@ export function useMultipleCategoryTimelines(categoryIds: string[]) {
     queryFn: async () => {
       const results = await Promise.allSettled(
         categoryIds.map((categoryId) =>
-          fetchTimelinesByCategory(categoryId, idToken!)
+          timelineService.fetchTimelinesByCategory(categoryId)
         )
       );
 
@@ -93,7 +78,131 @@ export function useMultipleCategoryTimelines(categoryIds: string[]) {
 
       return { timelinesMap, errorsMap };
     },
-    enabled: isAuthenticated && !!idToken && categoryIds.length > 0,
+    enabled: categoryIds.length > 0,
     ...cacheConfig.timelines,
+  });
+}
+
+/**
+ * Hook to fetch timeline by ID
+ * @param timelineId - Timeline identifier
+ * @param enabled - Whether to enable the query
+ */
+export function useTimelineById(timelineId: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: queryKeys.timelines.detail(timelineId),
+    queryFn: () => timelineService.fetchTimelineById(timelineId),
+    enabled: enabled && !!timelineId,
+    ...cacheConfig.timelines,
+  });
+}
+
+/**
+ * Hook to fetch timeline with full details
+ * @param timelineId - Timeline identifier
+ * @param enabled - Whether to enable the query
+ */
+export function useTimelineDetails(
+  timelineId: string,
+  enabled: boolean = true
+) {
+  return useQuery({
+    queryKey: [...queryKeys.timelines.detail(timelineId), "full"],
+    queryFn: () => timelineService.fetchTimelineDetails(timelineId),
+    enabled: enabled && !!timelineId,
+    ...cacheConfig.timelines,
+  });
+}
+
+/**
+ * Hook to fetch featured timelines
+ * @param limit - Number of timelines to fetch
+ */
+export function useFeaturedTimelines(limit: number = 10) {
+  return useQuery({
+    queryKey: [...queryKeys.timelines.all(), "featured", limit],
+    queryFn: () => timelineService.fetchFeaturedTimelines(limit),
+    ...cacheConfig.timelines,
+  });
+}
+
+/**
+ * Hook to fetch trending timelines
+ * @param limit - Number of timelines to fetch
+ */
+export function useTrendingTimelines(limit: number = 10) {
+  return useQuery({
+    queryKey: [...queryKeys.timelines.all(), "trending", limit],
+    queryFn: () => timelineService.fetchTrendingTimelines(limit),
+    ...cacheConfig.timelines,
+  });
+}
+
+/**
+ * Mutation hook to create a timeline
+ */
+export function useCreateTimeline() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: CreateTimelineRequest) =>
+      timelineService.createTimeline(request),
+    onSuccess: (newTimeline) => {
+      // Invalidate category timelines to refetch
+      if (newTimeline.category_id) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.timelines.byCategory(newTimeline.category_id),
+        });
+      }
+
+      // Invalidate all timelines list
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.timelines.lists(),
+      });
+    },
+  });
+}
+
+/**
+ * Mutation hook to update a timeline
+ */
+export function useUpdateTimeline() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: UpdateTimelineRequest) =>
+      timelineService.updateTimeline(request),
+    onSuccess: (updatedTimeline) => {
+      // Update the specific timeline in cache
+      queryClient.setQueryData(
+        queryKeys.timelines.detail(updatedTimeline.id),
+        updatedTimeline
+      );
+
+      // Invalidate category timelines
+      if (updatedTimeline.category_id) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.timelines.byCategory(updatedTimeline.category_id),
+        });
+      }
+    },
+  });
+}
+
+/**
+ * Mutation hook to delete a timeline
+ */
+export function useDeleteTimeline() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (timelineId: string) =>
+      timelineService.deleteTimeline(timelineId),
+    onSuccess: () => {
+      // Invalidate all timeline queries
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.timelines.all(),
+      });
+    },
   });
 }

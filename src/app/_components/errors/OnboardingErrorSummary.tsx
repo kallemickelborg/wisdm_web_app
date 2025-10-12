@@ -2,7 +2,7 @@
 
 import React from "react";
 import styles from "./OnboardingError.module.scss";
-import { FieldErrors } from "@/hooks/useOnboardingErrors";
+import type { FieldErrors } from "@/models";
 
 interface OnboardingErrorSummaryProps {
   formError?: string | null;

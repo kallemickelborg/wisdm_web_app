@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 // API/Database Imports
 import { ThemeProvider } from "@/app/_contexts/ThemeContext";
 import { WebSocketProvider } from "@/app/_lib/socket/socket";
+import { WebSocketChannelProvider } from "@/app/_contexts/WebSocketChannelContext";
 
 // Component Imports
-import StoreProvider from "./StoreProvider";
 import AuthWrapper from "./_components/auth/AuthWrapper";
 import { QueryProvider } from "@/app/_lib/query/QueryProvider";
 
@@ -32,13 +32,13 @@ export default function RootLayout({
       <body>
         <main>
           <QueryProvider>
-            <StoreProvider>
-              <ThemeProvider>
-                <WebSocketProvider>
+            <ThemeProvider>
+              <WebSocketProvider>
+                <WebSocketChannelProvider>
                   <AuthWrapper>{children}</AuthWrapper>
-                </WebSocketProvider>
-              </ThemeProvider>
-            </StoreProvider>
+                </WebSocketChannelProvider>
+              </WebSocketProvider>
+            </ThemeProvider>
           </QueryProvider>
         </main>
       </body>

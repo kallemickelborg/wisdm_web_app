@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { useAppDispatch } from "@/redux_lib/hooks";
-import { apiSocketWrapper } from "@/redux_lib/features/authSlice";
+import { useAuth } from "@/app/_lib/hooks/useAuth";
 import { socket } from "@/app/_lib/socket/socket";
 import Image from "next/image";
 import commentSVG from "@/assets/icons/comment.svg";
 import styles from "@/app/_components/comments/CommentInput/CommentInput.module.scss";
-import { useAppSelector } from "@/redux_lib/hooks";
-import { standardizedPath } from "@/app/_lib/helper/navigation/path";
+import { standardizedPath } from "@/app/_lib/utils/path";
+import { useUserProfile } from "@/app/_lib/hooks";
 
 interface CommentInputProps {
   threadId: string;
@@ -21,32 +20,28 @@ const CommentInput: React.FC<CommentInputProps> = ({
   parentCommentId = null,
   placeholder = "Join the conversation",
   inputStyles,
-  threadType
+  threadType,
 }) => {
-  const dispatch = useAppDispatch();
-  const username = useAppSelector(state => state.user.username)
+  const { idToken } = useAuth();
+  const { data: profile } = useUserProfile();
+  const username = profile?.username;
   const [newComment, setNewComment] = useState("");
 
-  const path = standardizedPath()
+  const path = standardizedPath();
 
   const postComment = () => {
-    dispatch(
-      apiSocketWrapper({
-        cb: (args: object) => {
-          socket.emit("send_comment", args);
-        },
-        args: {
-          room: threadId,
-          thread_id: threadId,
-          reference_type: threadType,
-          body: newComment,
-          parent_id: parentCommentId,
-          reference_id: null,
-          username: username,
-          path: path
-        },
-      })
-    );
+    if (!socket) return; // Guard against null socket
+    socket.emit("send_comment", {
+      room: threadId,
+      thread_id: threadId,
+      reference_type: threadType,
+      body: newComment,
+      parent_id: parentCommentId,
+      reference_id: null,
+      username: username,
+      path: path,
+      token: idToken,
+    });
     setNewComment("");
   };
 
@@ -58,7 +53,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newComment.length) {
+    if (e.key === "Enter" && newComment.length) {
       postComment();
     }
   };
@@ -73,8 +68,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
         onChange={({ target: { value } }) => setNewComment(value)}
         className={styles.inputField}
         style={{
-          fontSize: '16px',
-          border: '1px solid',
+          fontSize: "16px",
+          border: "1px solid",
           ...inputStyles,
         }}
         onKeyDown={handleKeyDown}

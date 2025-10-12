@@ -13,7 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 // WebSocket Context Provider & Hook
 import { useWebSocket, socket } from "@/app/_lib/socket/socket";
-import { updateNotificationState } from "@/redux_lib/features/notificationsSlice";
+import { useWebSocketChannel } from "@/app/_contexts/WebSocketChannelContext";
 
 // Error Boundary Components
 import { ErrorBoundary } from "@/app/_components/errors/ErrorBoundary";
@@ -21,16 +21,13 @@ import { ErrorBoundary } from "@/app/_components/errors/ErrorBoundary";
 // Stylesheet Imports
 import styles from "@/app/(pages)/(dashboard)/home/Home.module.scss";
 
-// Redux (keeping for notifications temporarily)
-import { useAppDispatch } from "@/redux_lib/hooks";
-import { apiHTTPWrapper } from "@/redux_lib/features/authSlice";
-import { setNotificationState } from "@/redux_lib/features/notificationsSlice";
-
-// TanStack Query Auth
-import { useAuth, useUserProfile } from "@/app/_lib/auth/useAuth";
+// TanStack Query Hooks
+import { useUserProfile, useNotifications } from "@/app/_lib/hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/app/_lib/query/QueryProvider";
 
 // Component Imports
-import NavigationBar from "@/app/_components/navigation/NavigationBar";
+import { BaseFooter } from "@/app/_components/footer";
 import Sidebar from "@/app/_components/navigation/Sidebar";
 
 const routes = ["home", "explore", "profile", "vote", "notifications"];
@@ -64,71 +61,45 @@ const LayoutComponent: React.FC<LayoutProps> = ({ children }) => {
   const closeSidebar = () => setShowSidebar(false);
   const pathname = usePathname();
   const router = useRouter();
-  // Use TanStack Query auth instead of Redux
-  const { idToken } = useAuth();
-  const { profile: user } = useUserProfile();
+  const { data: user } = useUserProfile();
   const { isConnected, joinRoom, leaveRoom } = useWebSocket();
-  const dispatch = useAppDispatch();
+  const { currentChannel } = useWebSocketChannel();
+  const queryClient = useQueryClient();
 
-  // Fetch notifications only once when component mounts, not on every route change
+  // Fetch notifications using TanStack Query hook
+  const { data: notificationsResponse } = useNotifications();
+
+  // Handle WebSocket notification updates
   useEffect(() => {
-    const getNotifications = async () => {
-      if (!idToken) return;
+    if (!socket) return; // Guard against null socket
 
-      try {
-        const notificationResponse = await dispatch(
-          apiHTTPWrapper({
-            url: `${process.env.NEXT_PUBLIC_BASE_API_URL}/notifications/get/notifications`,
-            idToken, // Use TanStack Query token
-          })
-        );
-
-        if (notificationResponse.payload) {
-          dispatch(
-            setNotificationState(notificationResponse.payload.notifications)
-          );
-        } else {
-          console.log("You don't have any notifications");
-        }
-      } catch (error) {
-        console.error(
-          `There was an error fetching your notifications: ${error}`
-        );
-      }
-    };
-
-    // Only fetch if we don't have notifications already
-    getNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
-
-  useEffect(() => {
-    socket.on("receive_notification_update", (response) => {
-      const notification = response;
-
-      dispatch(updateNotificationState(notification));
+    socket.on("receive_notification_update", (notification) => {
+      // Invalidate notifications query to refetch
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.notifications.list(),
+      });
     });
 
     return () => {
+      if (!socket) return;
       socket.off("receive_notification_update");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Socket listeners should only be set up once
+  }, [queryClient]);
 
-  // Join/leave WebSocket rooms based on user channel
-  // Only runs when connection state or user channel changes
+  // Join/leave WebSocket rooms based on current channel
+  // Only runs when connection state or current channel changes
   useEffect(() => {
-    if (!isConnected || !user?.current_channel) return;
+    if (!isConnected || !currentChannel) return;
 
-    console.log("✅ WebSocket connected. Joining room:", user.current_channel);
-    joinRoom(user.current_channel);
+    console.log("✅ WebSocket connected. Joining room:", currentChannel);
+    joinRoom(currentChannel);
 
     return () => {
-      console.log("🏁 Cleaning up. Leaving room:", user?.current_channel);
-      if (!user?.current_channel) return;
-      leaveRoom(user.current_channel);
+      console.log("🏁 Cleaning up. Leaving room:", currentChannel);
+      if (!currentChannel) return;
+      leaveRoom(currentChannel);
     };
-  }, [isConnected, user?.current_channel, joinRoom, leaveRoom]);
+  }, [isConnected, currentChannel, joinRoom, leaveRoom]);
 
   // Prefetch routes on mount for faster navigation
   useEffect(() => {
@@ -154,7 +125,7 @@ const LayoutComponent: React.FC<LayoutProps> = ({ children }) => {
     >
       <div className={styles.onboardingWrapper}>
         {children}
-        {shouldShowNavBar && <NavigationBar />}
+        {shouldShowNavBar && <BaseFooter variant="dashboard" />}
         <Sidebar isOpen={showSidebar} onClose={closeSidebar} />
       </div>
     </SidebarContext.Provider>

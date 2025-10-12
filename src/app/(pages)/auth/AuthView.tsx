@@ -1,0 +1,38 @@
+"use client";
+
+// System Imports
+import { useContext } from "react";
+import Link from "next/link";
+import Image from "next/image";
+
+// API/Database Imports
+import { ThemeContext } from "@/app/_contexts/ThemeContext";
+
+// Stylesheet Imports
+import styles from "@/app/(pages)/auth/auth.module.scss";
+
+// Asset Imports
+import wisdmLogoWhite from "@/assets/logos/wisdm_logo_white.svg";
+import wisdmLogoBrand from "@/assets/logos/wisdm_logo_brand.svg";
+
+const AuthView = () => {
+  const { theme } = useContext(ThemeContext);
+
+  return (
+    <div className={styles.startScreenWrapper}>
+      <Image
+        src={theme === "light" ? wisdmLogoBrand : wisdmLogoWhite}
+        alt="Wisdm Logo"
+      />
+      <h1>WISDM</h1>
+      <Link href="/auth/signup" className={styles.signupButton}>
+        Sign Up
+      </Link>
+      <Link href="/auth/login" className={styles.loginButton}>
+        Log In
+      </Link>
+    </div>
+  );
+};
+
+export default AuthView;

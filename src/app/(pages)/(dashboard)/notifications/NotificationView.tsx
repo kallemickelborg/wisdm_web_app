@@ -3,37 +3,28 @@
 // System Imports
 import React, { useEffect } from "react";
 
-// API/Database Imports
-import { useAppSelector } from "@/redux_lib/hooks";
-
 // Stylesheet Imports
 import styles from "@/app/(pages)/(dashboard)/notifications/Notifications.module.scss";
 
 // Component Imports
 import BaseHeader from "@/app/_components/header";
 import BaseCard from "@/app/_components/cards/BaseCard";
-import { useLoadingState } from "@/hooks/useLoadingState";
 import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
-import { notificationMessage } from "@/app/_lib/helper/response/notifications";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ArrowRightBrand from "@/assets/icons/arrow_right_brand.svg";
 
+// Hooks
+import { useNotifications } from "@/app/_lib/hooks";
+
 const NotificationView = () => {
-  const notifications = useAppSelector((state) => state.notifications);
-  const { isLoading, setLoaded } = useLoadingState(["notifications"]);
   const router = useRouter();
 
-  useEffect(() => {
-    //  This basically does nothing and I hate it CHANGE IT!!!!!!!🔥🐶💩...
-    const fetchNotifications = async () => {
-      try {
-      } finally {
-        setLoaded("notifications");
-      }
-    };
-    fetchNotifications();
-  }, []);
+  // Fetch notifications using TanStack Query hook
+  const { data: notificationsResponse, isLoading } = useNotifications();
+
+  // Get notifications array from response
+  const notifications = notificationsResponse?.notifications || [];
 
   return (
     <div className={styles.pageContainer}>
@@ -45,15 +36,13 @@ const NotificationView = () => {
           </div>
         ) : (
           <>
-            {Object.values(notifications).length ? (
-              Object.entries(notifications).map(([key, notification]) => {
+            {notifications.length ? (
+              notifications.map((notification) => {
                 const {
-                  count,
+                  id,
                   action,
-                  created_at,
                   path,
-                  username,
-                  is_read,
+                  message,
                   reference_id,
                   reference_type,
                 } = notification;
@@ -73,15 +62,10 @@ const NotificationView = () => {
 
                 return (
                   <BaseCard
-                    key={key}
+                    key={id}
                     variant="notification"
                     title={`🔔 ${action}`}
-                    content={notificationMessage(
-                      username,
-                      count,
-                      action,
-                      created_at
-                    )}
+                    content={message}
                     onClick={() => router.push(newPath)}
                     actionIcon={
                       <Image

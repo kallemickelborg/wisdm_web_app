@@ -7,8 +7,7 @@ import { onSignOut } from "@/app/_lib/firebase/auth/auth_sign_out";
 import { ThemeContext } from "@/app/_contexts/ThemeContext";
 
 // Component Imports
-import ToggleSwitch from "@/app/_components/buttons/ToggleSwitch";
-import ThemeToggle from "@/app/_components/buttons/ThemeToggle";
+import BaseToggle from "@/app/_components/toggles/BaseToggle";
 
 // Stylesheet Imports
 import styles from "@/app/_components/navigation/Sidebar.module.scss";
@@ -25,7 +24,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { theme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const [isPushNotificationsOn, setIsPushNotificationsOn] = useState(false);
 
   return (
@@ -63,11 +62,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
         <div className={styles.sidebarItem}>
           <p>Push Notifications</p>
-          <ToggleSwitch
+          <BaseToggle
             isOn={isPushNotificationsOn}
-            handleToggle={() =>
-              setIsPushNotificationsOn(!isPushNotificationsOn)
-            }
+            onToggle={() => setIsPushNotificationsOn(!isPushNotificationsOn)}
+            ariaLabel="Toggle push notifications"
           />
         </div>
       </div>
@@ -83,7 +81,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
         <div className={styles.sidebarItem}>
           <p>Dark/Light Mode</p>
-          <ThemeToggle />
+          <BaseToggle
+            isOn={theme === "light"}
+            onToggle={toggleTheme}
+            ariaLabel="Toggle dark/light mode"
+          />
         </div>
       </div>
       <h2>Support and Feedback</h2>

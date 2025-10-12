@@ -86,8 +86,13 @@ export const queryKeys = {
   // User data
   user: {
     all: () => ["user"] as const,
-    profile: (userId?: string) => ["user", "profile", userId] as const,
-    traits: (userId?: string) => ["user", "traits", userId] as const,
+    profile: () => ["user", "profile"] as const,
+    byUsername: (username: string) => ["user", "profile", username] as const,
+    traits: () => ["user", "traits"] as const,
+    traitsByUsername: (username: string) =>
+      ["user", "traits", username] as const,
+    settings: () => ["user", "settings"] as const,
+    interests: () => ["user", "interests"] as const,
   },
 
   // Timelines

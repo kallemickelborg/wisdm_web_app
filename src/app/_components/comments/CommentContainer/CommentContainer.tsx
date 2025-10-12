@@ -4,31 +4,23 @@ import React, { useEffect, useReducer, useState } from "react";
 
 import { socket } from "@/app/_lib/socket/socket";
 
-// Redux
-import { useAppDispatch } from "@/redux_lib/hooks";
-import { apiHTTPWrapper } from "@/redux_lib/features/authSlice";
-
-// Auth
-import { useAuth } from "@/app/_lib/auth/useAuth";
-
 // Components
 import RecursiveCommentDisplay from "../RecursiveCommentDisplay/RecursiveCommentDisplay";
 import RootCommentInput from "../RootCommentInput/RootCommentInput";
 import LoadingComments from "../../loading/LoadingComments/LoadingComments";
-
 import MainCommentDisplay from "../MainCommentDisplay/MainCommentDisplay";
 
+// Hooks
+import { useCommentThread } from "@/app/_lib/hooks";
+
+// Reducer
 import {
   commentReducer,
   INIT_COMMENT_THREAD,
   CommentOrder,
 } from "./commentReducer";
 
-import { CommentThread } from "@/types";
-
 import styles from "@/app/_components/comments/CommentContainer/CommentContainer.module.scss";
-
-const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
 interface CommentContainerProps {
   threadId: string;
@@ -53,14 +45,45 @@ const CommentContainer: React.FC<CommentContainerProps> = ({
     INIT_COMMENT_THREAD
   );
   const [orderBy, setOrderBy] = useState<CommentOrder>("DESC");
-  const dispatch = useAppDispatch();
-  const { idToken } = useAuth();
 
   const orderByButtonArray: ButtonProp[] = [
     { name: "ASC", text: "oldest" },
     { name: "DESC", text: "newest" },
   ];
 
+  // Fetch comment thread using TanStack Query hook
+  const {
+    data: commentThread,
+    isLoading,
+    refetch,
+  } = useCommentThread(
+    threadId,
+    rootCommentId,
+    {
+      order_by: orderBy,
+      offset: 0,
+      limit: 20,
+      reference_type: threadType,
+    },
+    true
+  );
+
+  // Update local state when data is fetched
+  useEffect(() => {
+    if (commentThread) {
+      commentDispatch({
+        type: "setThread",
+        payload: { commentThread, order: orderBy, reset: true },
+      });
+    }
+  }, [commentThread, orderBy]);
+
+  // Refetch when order changes
+  useEffect(() => {
+    refetch();
+  }, [orderBy, refetch]);
+
+  // Helper function for recursive comment loading
   const handleGetComments = async (
     commentId: string,
     offset: number = 0,
@@ -68,36 +91,15 @@ const CommentContainer: React.FC<CommentContainerProps> = ({
     cb = () => null,
     limit: number = 20
   ) => {
-    const url = `${BASE_API_URL}/comments/get/get_comment_thread?thread_id=${threadId}&start_id=${commentId}&order_by=${orderBy}&offset=${offset}&limit=${limit}&reference_type=${threadType}`;
-
-    try {
-      const actionResult = await dispatch(
-        apiHTTPWrapper({
-          url: url,
-          idToken: idToken || undefined,
-        })
-      );
-      if (apiHTTPWrapper.fulfilled.match(actionResult)) {
-        const result: CommentThread = actionResult.payload;
-        commentDispatch({
-          type: "setThread",
-          payload: { commentThread: result, order: orderBy, reset: reset },
-        });
-      } else {
-        console.error("Failed to load comments:", actionResult.error);
-      }
-    } catch (error) {
-      console.error("Error loading comments:", error);
-    } finally {
-      cb();
-    }
+    // This function is still needed for recursive comment loading
+    // but now it uses the refetch from the hook
+    await refetch();
+    cb();
   };
 
   useEffect(() => {
-    handleGetComments(rootCommentId, 0, true);
-  }, [orderBy]);
+    if (!socket) return; // Guard against null socket
 
-  useEffect(() => {
     socket.on("receive_comment", (response) => {
       const {
         comment,
@@ -116,11 +118,14 @@ const CommentContainer: React.FC<CommentContainerProps> = ({
     });
 
     return () => {
+      if (!socket) return;
       socket.off("receive_comment");
     };
   }, [orderBy]);
 
   useEffect(() => {
+    if (!socket) return; // Guard against null socket
+
     socket.on("receive_comment_update", (response) => {
       let updatedComment = response;
       if ("vote" in response) {
@@ -135,6 +140,7 @@ const CommentContainer: React.FC<CommentContainerProps> = ({
     });
 
     return () => {
+      if (!socket) return;
       socket.off("receive_comment_update");
     };
   }, []);

@@ -8,8 +8,9 @@ import Link from "next/link";
 // Component Imports
 import SearchBar from "@/app/_components/navigation/SearchBar";
 import InstructionOverlay from "@/app/_components/overlay/InstructionOverlay";
-import ThemeToggle from "@/app/_components/buttons/ThemeToggle";
+import BaseToggle from "@/app/_components/toggles/BaseToggle";
 import { useSidebar } from "@/app/(pages)/(dashboard)/layout";
+import { ThemeContext } from "@/app/_contexts/ThemeContext";
 
 // Type Imports
 import { BaseHeaderProps } from "./types";
@@ -72,6 +73,7 @@ const BaseHeader: React.FC<BaseHeaderProps> = ({
   className = "",
 }) => {
   const { openSidebar } = useSidebar();
+  const { theme, toggleTheme } = React.useContext(ThemeContext);
 
   // Determine header classes based on variant
   const headerClasses = [
@@ -101,7 +103,11 @@ const BaseHeader: React.FC<BaseHeaderProps> = ({
               </Link>
             )}
             <h1 className={styles.timelineTitle}>{title}</h1>
-            <ThemeToggle />
+            <BaseToggle
+              isOn={theme === "light"}
+              onToggle={toggleTheme}
+              ariaLabel="Toggle dark/light mode"
+            />
           </div>
         </header>
         {children}

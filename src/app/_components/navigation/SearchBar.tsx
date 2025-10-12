@@ -10,30 +10,33 @@ import searchIcon from "@/assets/icons/search.svg";
 import styles from "./SearchBar.module.scss";
 import timeline_1 from "@/assets/images/timeline_1.png";
 
+// Hooks
+import { useSimpleSearch } from "@/app/_lib/hooks";
+
 interface SearchBarProps {
   className?: string;
   placeholder?: string;
-  apiBaseUrl?: string;
-  idToken?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   className = "",
   placeholder = "Search",
-  apiBaseUrl,
-  idToken,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
-    null
-  );
-
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Use the search hook with automatic debouncing
+  const {
+    data: searchResponse,
+    isLoading: isSearching,
+    error,
+  } = useSimpleSearch(searchQuery, 400);
+
+  // Extract results from response
+  const searchResults = searchResponse?.results || [];
+
+  // Handle click outside to close dropdown
   useEffect(() => {
     if (!searchFocused) return;
     function handleClickOutside(event: MouseEvent) {
@@ -49,49 +52,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [searchFocused]);
-
-  useEffect(() => {
-    if (debounceTimeout) {
-      clearTimeout(debounceTimeout);
-    }
-    if (searchQuery.trim() === "") {
-      setSearchResults([]);
-      setIsSearching(false);
-      setError(null);
-      return;
-    }
-    setIsSearching(true);
-    const timeout = setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `${
-            apiBaseUrl || process.env.NEXT_PUBLIC_BASE_API_URL
-          }/search?q=${encodeURIComponent(searchQuery)}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${idToken || ""}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setSearchResults(data.results || []);
-        setError(null);
-      } catch (error) {
-        console.error("Error searching:", error);
-        setError("Failed to search. Please try again later.");
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400);
-    setDebounceTimeout(timeout);
-    return () => clearTimeout(timeout);
-  }, [searchQuery, idToken, apiBaseUrl]);
 
   return (
     <>
@@ -133,93 +93,78 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   <LoadingSpinner />
                 </div>
               ) : error ? (
-                <div className={styles.dropdownError}>{error}</div>
+                <div className={styles.dropdownError}>
+                  {error.message || "Failed to search. Please try again later."}
+                </div>
               ) : searchResults.length === 0 ? (
                 <div className={styles.dropdownNoResults}>
                   No results found.
                 </div>
               ) : (
-                <>
-                  {(() => {
-                    const timelines = searchResults.filter(
-                      (r) => r.type === "timeline"
-                    );
-                    const events = searchResults.filter(
-                      (r) => r.type === "event"
-                    );
-                    const summaries = searchResults.filter(
-                      (r) => r.type === "summary"
-                    );
-                    return (
-                      <>
-                        {timelines.length > 0 && (
-                          <div className={styles.searchDropdownSection}>
-                            <h2 className={styles.dropdownSectionTitle}>
-                              Timeline Results
-                            </h2>
-                            <div className={styles.searchDropdownMasonry}>
-                              {timelines.map((item) => {
-                                const imageMap: { [key: string]: any } = {
-                                  "timeline_1.png": timeline_1,
-                                };
-                                const imageSource =
-                                  imageMap[item.image] || timeline_1;
+                <div className={styles.searchDropdownSection}>
+                  <h2 className={styles.dropdownSectionTitle}>Results</h2>
+                  <div className={styles.searchDropdownMasonry}>
+                    {searchResults.map((item) => {
+                      // Handle different result types
+                      if (item.type === "timeline" || item.type === "topic") {
+                        const imageMap: { [key: string]: any } = {
+                          "timeline_1.png": timeline_1,
+                        };
+                        const imageSource = item.image
+                          ? imageMap[item.image] || timeline_1
+                          : timeline_1;
 
-                                return (
-                                  <Link
-                                    href={`/timeline?id=${item.id}`}
-                                    key={`timeline-${item.id}`}
-                                  >
-                                    <BaseCard
-                                      variant="timeline"
-                                      layout="compact"
-                                      image={imageSource}
-                                      imagePosition="top"
-                                      showOverlay={false}
-                                      title={item.title}
-                                    />
-                                  </Link>
-                                );
-                              })}
+                        return (
+                          <Link
+                            href={item.url || `/timeline?id=${item.id}`}
+                            key={`${item.type}-${item.id}`}
+                          >
+                            <BaseCard
+                              variant="timeline"
+                              layout="compact"
+                              image={imageSource}
+                              imagePosition="top"
+                              showOverlay={false}
+                              title={item.title}
+                            />
+                          </Link>
+                        );
+                      }
+
+                      // Handle comment results
+                      if (item.type === "comment") {
+                        return (
+                          <Link
+                            href={item.url || `/comment/${item.id}`}
+                            key={`comment-${item.id}`}
+                          >
+                            <div className={styles.dropdownCommentItem}>
+                              <h4>{item.title}</h4>
+                              {item.description && <p>{item.description}</p>}
                             </div>
-                          </div>
-                        )}
-                        {events.length > 0 && (
-                          <div className={styles.searchDropdownSection}>
-                            <h2 className={styles.dropdownSectionTitle}>
-                              Event Results
-                            </h2>
-                            {events.map((item) => (
-                              <div
-                                key={`event-${item.id}`}
-                                className={styles.dropdownEventItem}
-                              >
-                                <h4>{item.title || "Event"}</h4>
-                                <p>{item.body}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {summaries.length > 0 && (
-                          <div className={styles.searchDropdownSection}>
-                            <h2 className={styles.dropdownSectionTitle}>
-                              Summary Results
-                            </h2>
-                            {summaries.map((item) => (
-                              <div
-                                key={`summary-${item.id}`}
-                                className={styles.dropdownSummaryItem}
-                              >
-                                <h4>Summary</h4>
-                                <p>{item.text}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-                </>
+                          </Link>
+                        );
+                      }
+
+                      // Handle user results
+                      if (item.type === "user") {
+                        return (
+                          <Link
+                            href={item.url || `/profile/${item.id}`}
+                            key={`user-${item.id}`}
+                          >
+                            <div className={styles.dropdownUserItem}>
+                              <h4>{item.title}</h4>
+                              {item.description && <p>{item.description}</p>}
+                            </div>
+                          </Link>
+                        );
+                      }
+
+                      return null;
+                    })}
+                  </div>
+                </div>
               )}
             </motion.div>
           )}

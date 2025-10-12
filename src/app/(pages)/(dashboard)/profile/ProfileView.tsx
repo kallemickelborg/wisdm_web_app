@@ -1,10 +1,8 @@
 "use client";
 
 // System Imports
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-
-// API/Database Imports
 
 // Component Imports
 import BaseHeader from "@/app/_components/header";
@@ -18,141 +16,38 @@ import styles from "@/app/(pages)/(dashboard)/profile/Profile.module.scss";
 // Asset Imports
 import placeholderAvatar from "@/assets/icons/user_avatar.svg";
 
-// Redux imports
-import { useAppDispatch } from "@/redux_lib/hooks";
-import { apiHTTPWrapper } from "@/redux_lib/features/authSlice";
-import { useLoadingState } from "@/hooks/useLoadingState";
-
-// Auth imports
-import { useAuth, useUserProfile } from "@/app/_lib/auth/useAuth";
-
-interface UserState {
-  username: string | null;
-  email: string | null;
-  created_at: string | null;
-  photo_url: string | null;
-  locality: string | null;
-  gender: string | null;
-  name: string | null;
-  disabled: boolean;
-  partial_data: boolean;
-  current_channel: string | null;
-  last_sign_in_time: string | null;
-}
-
-interface UserSettingsProps {
-  user: UserState;
-  onBack: () => void;
-}
-
-type UserTrait = string;
-
-interface UserTraitsResponse {
-  traits: UserTrait[];
-}
+// Hooks
+import { useUserProfile, useRecentCommentsByUser } from "@/app/_lib/hooks";
 
 const ProfileView: React.FC = () => {
-  const { profile: user, isLoading: profileLoading } = useUserProfile();
-  const { idToken } = useAuth();
-  const dispatch = useAppDispatch();
+  // State
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState("comments");
-  const [userTraits, setUserTraits] = useState<UserTrait[]>([]);
-  const [comments, setComments] = useState<any[]>([]);
-  const { isLoading, setLoaded } = useLoadingState(["userTraits", "comments"]);
 
-  // Debug: Log user profile data
-  useEffect(() => {
-    console.log("ProfileView - user profile:", user);
-    console.log("ProfileView - profileLoading:", profileLoading);
-  }, [user, profileLoading]);
+  // Fetch user profile using TanStack Query hook
+  const {
+    data: user,
+    isLoading: profileLoading,
+    error: profileError,
+  } = useUserProfile();
 
-  useEffect(() => {
-    const fetchUserTraits = async () => {
-      try {
-        if (!user?.username) {
-          console.log("No user ID available yet");
-          return;
-        }
+  // Fetch user's recent comments using TanStack Query hook
+  const {
+    data: comments = [],
+    isLoading: commentsLoading,
+    error: commentsError,
+  } = useRecentCommentsByUser(user?.username || "", 20, 0, !!user?.username);
 
-        const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+  // Combined loading state
+  const isLoading = profileLoading || commentsLoading;
 
-        const traitsUrl = `${API_BASE_URL}/user_traits/get/traits`;
-        console.log("Fetching user traits for username:", user.username);
-        console.log("API URL:", traitsUrl);
-
-        const traitsResponse = await dispatch(
-          apiHTTPWrapper({
-            url: traitsUrl,
-            options: {
-              method: "GET",
-            },
-            idToken: idToken || undefined,
-          })
-        );
-
-        console.log("Traits response:", traitsResponse);
-
-        if (traitsResponse.payload) {
-          const payload = traitsResponse.payload;
-          console.log("Setting user traits:", payload);
-          setUserTraits(payload.traits ?? payload);
-        } else {
-          console.log("No traits in response");
-          setUserTraits([]);
-        }
-      } catch (error) {
-        console.error("Error fetching user traits:", error);
-        setUserTraits([]);
-      } finally {
-        setLoaded("userTraits");
-      }
-    };
-
-    fetchUserTraits();
-  }, [user?.username, dispatch, idToken]);
-
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        if (!user?.username) {
-          console.log("No user ID available yet for comments");
-          return;
-        }
-        const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
-        const commentsUrl = `${API_BASE_URL}/comments/get_recent`;
-        console.log("Fetching comments for user:", user.username);
-        console.log("Comments API URL:", commentsUrl);
-        const commentsResponse = await dispatch(
-          apiHTTPWrapper({
-            url: commentsUrl,
-            options: { method: "GET" },
-            idToken: idToken || undefined,
-          })
-        );
-        console.log("Comments response:", commentsResponse);
-        if (commentsResponse.payload) {
-          const payload = commentsResponse.payload;
-          setComments(payload.comments || []);
-        } else {
-          console.log("No comments in response");
-          setComments([]);
-        }
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-        setComments([]);
-      } finally {
-        setLoaded("comments");
-      }
-    };
-
-    fetchComments();
-  }, [user?.username, dispatch, idToken]);
-
-  const getTraitClassName = (trait: string) => {
-    const formattedTrait = "active" + trait.replace(/[\s-]/g, "");
-    return styles[formattedTrait] || "";
-  };
+  // Debug logging
+  if (profileError) {
+    console.error("Profile fetch error:", profileError);
+  }
+  if (user) {
+    console.log("User profile data:", user);
+  }
 
   const savedTopics: any[] = [];
   const wordsOfWisdm: any[] = [];
@@ -165,11 +60,36 @@ const ProfileView: React.FC = () => {
     username: user?.username || "",
     email: user?.email || "",
     photo_url: user?.photo_url,
+    name: user?.name || "",
+    gender: user?.gender || "",
+    locality: user?.locality || "",
+    interests: user?.interests || [],
+    traits: user?.traits || [],
   };
 
   const joinedDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString()
     : "Loading...";
+
+  // Show error state if profile fails to load
+  if (profileError) {
+    return (
+      <div className={styles.pageContainer}>
+        <div className={styles.pageWrapper}>
+          <BaseHeader title="Profile" variant="dashboard" />
+          <div style={{ padding: "2rem", textAlign: "center" }}>
+            <h2>Error Loading Profile</h2>
+            <p>
+              {profileError instanceof Error
+                ? profileError.message
+                : "Failed to load user profile"}
+            </p>
+            <p>Please try refreshing the page or logging in again.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.pageContainer}>
@@ -200,12 +120,14 @@ const ProfileView: React.FC = () => {
             </h2>
             <p>Joined {joinedDate}</p>
             <div className={styles.tagContainer}>
-              {userTraits.map((trait, index) => (
+              {user?.traits?.map((trait, index) => (
                 <div
-                  key={index}
-                  className={`${styles.tagItem} ${getTraitClassName(trait)}`}
+                  key={trait.id || index}
+                  className={`${styles.tagItem} ${
+                    styles[`active${trait.class_name}`]
+                  }`}
                 >
-                  {trait.split(/(?=[A-Z])/).join(" ")}
+                  {trait.label}
                 </div>
               ))}
             </div>

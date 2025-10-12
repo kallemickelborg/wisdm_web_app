@@ -3,14 +3,11 @@
 // System Imports
 import React, { useState, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
-
-// API/Database Imports
-import { getActiveCategories } from "@/app/_config/categories";
 
 // TanStack Query Hooks
 import { useMultipleCategoryTimelines } from "@/app/_lib/hooks/useTimelines";
+import { useUserProfile } from "@/app/_lib/hooks";
 
 // Component Imports
 import BaseCard from "@/app/_components/cards/BaseCard";
@@ -37,32 +34,70 @@ const HomeView = () => {
     setIsOverlayVisible(!isOverlayVisible);
   };
 
-  // --- CATEGORY CONFIGURATION ---
-  // ✅ Using centralized configuration management
-  const categories = getActiveCategories();
-  const categoryIds = categories.map((cat) => cat.id);
+  // Fetch user profile to get their selected interests (categories)
+  const {
+    data: user,
+    isLoading: userLoading,
+    error: userError,
+  } = useUserProfile();
+
+  // Extract user's interests (categories)
+  const userCategories = user?.interests || [];
+  const categoryIds = userCategories.map((cat) => cat.id);
 
   const [selectedCategoryIdx, setSelectedCategoryIdx] = useState(0);
-  const selectedCategory = categories[selectedCategoryIdx];
+  const selectedCategory = userCategories[selectedCategoryIdx];
 
-  // Use TanStack Query for timeline data
+  // Use TanStack Query for timeline data (only if user has categories)
+  const shouldFetchTimelines = categoryIds.length > 0;
   const {
     data: categoryData,
     isLoading: allLoading,
     error: categoryQueryError,
-  } = useMultipleCategoryTimelines(categoryIds);
+  } = useMultipleCategoryTimelines(shouldFetchTimelines ? categoryIds : []);
 
   // Extract timelines and errors from query result
   const allCategoryTimelines = categoryData?.timelinesMap || {};
   const allCategoryErrors = categoryData?.errorsMap || {};
 
   // Get timelines and error for selected category
-  const categoryTimelines = allCategoryTimelines[selectedCategory.id] || [];
-  const categoryError =
-    allCategoryErrors[selectedCategory.id] ||
-    categoryQueryError?.message ||
-    null;
-  const categoryLoading = allLoading;
+  const categoryTimelines = selectedCategory
+    ? allCategoryTimelines[selectedCategory.id] || []
+    : [];
+  const categoryError = selectedCategory
+    ? allCategoryErrors[selectedCategory.id] ||
+      categoryQueryError?.message ||
+      null
+    : null;
+  const categoryLoading = userLoading || allLoading;
+
+  // Show error if user has no interests selected
+  if (userError) {
+    return (
+      <div className={styles.pageContainer}>
+        <BaseHeader title="For You" variant="dashboard" settings="gear" />
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <p>Error loading user profile. Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if user has no interests
+  if (!userLoading && userCategories.length === 0) {
+    return (
+      <div className={styles.pageContainer}>
+        <BaseHeader title="For You" variant="dashboard" settings="gear" />
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <h2>No Interests Selected</h2>
+          <p>
+            Please select your interests in your profile settings to see
+            personalized timelines.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // --- SWIPE DIRECTION STATE ---
   const [direction, setDirection] = useState(0);
@@ -95,7 +130,7 @@ const HomeView = () => {
         settings="gear"
       />
       <div className={styles.sectionTitle}>
-        <h2>{selectedCategory.title}</h2>
+        <h2>{selectedCategory?.name || "Loading..."}</h2>
       </div>
 
       <div className={styles.feedWrapper}>
@@ -115,13 +150,13 @@ const HomeView = () => {
             onDragStart={() => {
               isDragging.current = true;
             }}
-            onDragEnd={(event, info) => {
+            onDragEnd={(_event, info) => {
               setTimeout(() => {
                 isDragging.current = false;
               }, 0);
               if (
                 info.offset.x < -100 &&
-                selectedCategoryIdx < categories.length - 1
+                selectedCategoryIdx < userCategories.length - 1
               ) {
                 setDirection(1);
                 setSelectedCategoryIdx(selectedCategoryIdx + 1);
@@ -139,12 +174,9 @@ const HomeView = () => {
                 <div>{categoryError}</div>
               ) : categoryTimelines.length > 0 ? (
                 categoryTimelines.map((timeline) => {
-                  const imageMap: { [key: string]: any } = {
-                    "timeline_1.png": require("@/assets/images/timeline_1.png"),
-                  };
-                  const imageSource =
-                    imageMap[timeline.image] ||
-                    require("@/assets/images/timeline_1.png");
+                  // Use timeline image_url if available, otherwise use default
+                  const defaultImage = require("@/assets/images/timeline_1.png");
+                  const imageSource = timeline.image_url || defaultImage;
 
                   return (
                     <Link

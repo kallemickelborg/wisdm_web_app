@@ -1,3 +1,5 @@
+// TODO: MOVE TO BACKEND
+
 export const validateMinArrayLength = (
   arr: string[],
   minCount: number

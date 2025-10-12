@@ -2,8 +2,8 @@ import React, { useEffect, useState, Dispatch } from "react";
 import { Comment } from "@/types";
 import Image from "next/image";
 import userDefaultImage from "@/assets/icons/user_avatar.svg";
-import { getElapsedTime } from "@/app/_lib/helper/time/getElapsedTime";
-import { CommentActions } from "../CommentContainer/commentReducer"; 
+import { getElapsedTime } from "@/app/_lib/utils/time";
+import { CommentActions } from "../CommentContainer/commentReducer";
 
 import commentSVG from "@/assets/icons/comment.svg";
 import styles from "./CommentBody.module.scss";
@@ -11,12 +11,12 @@ import styles from "./CommentBody.module.scss";
 import VoteContainer from "../VoteContainer/VoteContainer";
 import NestedCommentInput from "../NestedCommentInput/NestedCommentInput";
 
-import { standardizePathAnchorIds } from "@/app/_lib/helper/navigation/path";
+import { standardizePathAnchorIds } from "@/app/_lib/utils/path";
 
 interface CommentBodyProps {
   comment: Comment;
   threadId: string;
-  commentDispatch: Dispatch<CommentActions>
+  commentDispatch: Dispatch<CommentActions>;
   threadType: string;
 }
 
@@ -24,7 +24,7 @@ const CommentBody: React.FC<CommentBodyProps> = ({
   comment,
   threadId,
   commentDispatch,
-  threadType
+  threadType,
 }) => {
   const {
     body,
@@ -34,7 +34,7 @@ const CommentBody: React.FC<CommentBodyProps> = ({
     username,
     created_at,
     id,
-    comment_count
+    comment_count,
   } = comment;
   const [elapsedTime, setElapsedTime] = useState(getElapsedTime(created_at));
   const [isReplying, setIsReplying] = useState<boolean>(false);
@@ -48,7 +48,10 @@ const CommentBody: React.FC<CommentBodyProps> = ({
   }, [created_at]);
 
   return (
-    <div id={standardizePathAnchorIds(id)} className={styles.commentBodyContainer}>
+    <div
+      id={standardizePathAnchorIds(id)}
+      className={styles.commentBodyContainer}
+    >
       <div className={styles.commentAvatar}>
         <Image
           id={id}
@@ -68,10 +71,10 @@ const CommentBody: React.FC<CommentBodyProps> = ({
         <div className={styles.commentContent}>
           <div className={styles.commentText}>{body}</div>
           <div className={styles.commentFooter}>
-            <VoteContainer 
-              threadId={threadId} 
+            <VoteContainer
+              threadId={threadId}
               comment={comment}
-              commentDispatch={commentDispatch} 
+              commentDispatch={commentDispatch}
             />
             <div className={styles.commentIconContainer}>
               <Image

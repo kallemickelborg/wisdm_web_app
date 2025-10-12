@@ -9,26 +9,33 @@ import React, {
 } from "react";
 import { Socket } from "socket.io-client";
 import { WebSocketManager, ConnectionState } from "./WebSocketManager";
-import { getWebSocketUrl, getFeatureFlags } from "../../_config/categories";
 import { WebSocketErrorBoundary } from "../../_components/errors/ErrorBoundary";
 
-// Get configuration-based WebSocket URL and features
+// Get WebSocket URL from environment
+const getWebSocketUrl = (): string => {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_API_URL || "http://127.0.0.1:5000";
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || "development";
+  const protocol = environment === "production" ? "wss" : "ws";
+  // Extract host from base URL (remove http/https protocol)
+  const host = baseUrl.replace(/^https?:\/\//, "");
+  return `${protocol}://${host}`;
+};
+
 const webSocketUrl = getWebSocketUrl();
-const features = getFeatureFlags();
 
 // Create WebSocket Manager instance with configuration
 const webSocketManager = new WebSocketManager({
   url: webSocketUrl,
   transports: ["websocket", "polling"],
   timeout: 20000,
-  reconnection: true,
+  reconnection: false, // Disable auto-reconnection to prevent blocking
   reconnectionDelay: 1000,
-  reconnectionAttempts: 5,
+  reconnectionAttempts: 0, // Don't retry failed connections
   autoConnect: false,
 });
 
-// Export socket for backward compatibility (initialize first)
-webSocketManager.initialize();
+// Export socket for backward compatibility (don't initialize immediately)
 export const socket: Socket = webSocketManager.getSocket() as Socket;
 
 // ✅ Enhanced Context Definition with WebSocket Manager
@@ -59,8 +66,12 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     let isMounted = true; // ✅ Prevents state updates on unmounted components
 
-    // Initialize the WebSocket manager
-    webSocketManager.initialize();
+    // Initialize the WebSocket manager (but don't connect yet)
+    try {
+      webSocketManager.initialize();
+    } catch (error) {
+      console.warn("WebSocket initialization failed (non-critical):", error);
+    }
 
     // Subscribe to connection state changes
     webSocketManager.onConnectionStateChange((state: ConnectionState) => {
@@ -70,8 +81,8 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
       }
     });
 
-    // Connect to the WebSocket server
-    webSocketManager.connect();
+    // DON'T auto-connect - let components connect manually when needed
+    // webSocketManager.connect();
 
     return () => {
       isMounted = false; // ✅ Prevents unnecessary re-renders

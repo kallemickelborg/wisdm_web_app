@@ -60,6 +60,13 @@
     flex-wrap: wrap;
     gap: vars.$gap-small;
   }
+  .tagItem {
+    background-color: var(--color-tag);
+    border-radius: vars.$radius-large;
+    padding: vars.$profile-tag-padding;
+    color: vars.$color-font-body;
+    font-size: vars.$font-size-body-small;
+  }
 }
 
 .editButton {

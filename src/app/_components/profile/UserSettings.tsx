@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 
 // Component Imports
-import ToggleSwitch from "@/app/_components/buttons/ToggleSwitch";
+import BaseToggle from "@/app/_components/toggles/BaseToggle";
 
 // Stylesheet Imports
 import styles from "@/app/_components/profile/UserSettings.module.scss";
@@ -23,15 +23,18 @@ interface UserSettingsProps {
   isOpen: boolean;
 }
 
-const UserSettings: React.FC<UserSettingsProps> = ({ user, onBack, isOpen }) => {
+const UserSettings: React.FC<UserSettingsProps> = ({
+  user,
+  onBack,
+  isOpen,
+}) => {
   const [displayUsername, setDisplayUsername] = useState(false);
   const [displayLabels, setDisplayLabels] = useState(false);
 
   return (
     <div
       className={
-        styles.userSettingsContainer +
-        (isOpen ? ' ' + styles.active : '')
+        styles.userSettingsContainer + (isOpen ? " " + styles.active : "")
       }
     >
       <header className={styles.pageTitle}>
@@ -85,9 +88,10 @@ const UserSettings: React.FC<UserSettingsProps> = ({ user, onBack, isOpen }) => 
           </p>
         </div>
         <div className={styles.toggleContainer}>
-          <ToggleSwitch
+          <BaseToggle
             isOn={displayUsername}
-            handleToggle={() => setDisplayUsername(!displayUsername)}
+            onToggle={() => setDisplayUsername(!displayUsername)}
+            ariaLabel="Toggle display username"
           />
         </div>
       </div>
@@ -100,9 +104,10 @@ const UserSettings: React.FC<UserSettingsProps> = ({ user, onBack, isOpen }) => 
           </p>
         </div>
         <div className={styles.toggleContainer}>
-          <ToggleSwitch
+          <BaseToggle
             isOn={displayLabels}
-            handleToggle={() => setDisplayLabels(!displayLabels)}
+            onToggle={() => setDisplayLabels(!displayLabels)}
+            ariaLabel="Toggle display labels"
           />
         </div>
       </div>

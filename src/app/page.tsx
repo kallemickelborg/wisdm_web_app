@@ -1,4 +1,5 @@
-// Component Imports
+// TODO: WHY IS THIS HERE?
+
 import SplashScreen from "./_components/loading/SplashScreen";
 
 const EnterApp = () => {

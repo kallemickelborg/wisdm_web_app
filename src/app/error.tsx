@@ -1,3 +1,5 @@
+// TODO: REMOVE THIS FILE
+
 "use client";
 
 import { ResourceError } from "@/app/_components/errors";

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/redux_lib/hooks";
-import { updateCurrentChannel } from "@/redux_lib/features/userSlice";
+import { useWebSocketChannel } from "@/app/_contexts/WebSocketChannelContext";
 import { useSearchParams } from "next/navigation";
 import { standardizePersonalRoomName } from "@/app/_lib/user/name/general";
+import { useUserProfile } from "@/app/_lib/hooks";
 
 import CommentContainer from "../CommentContainer/CommentContainer";
 import Link from "next/link";
@@ -24,16 +24,14 @@ const NotificationCommentContainer: React.FC<
   const referenceId: string = searchParams?.get("reference_id") || "";
   const threadType: string = searchParams?.get("thread") || "";
 
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
+  const { setCurrentChannel } = useWebSocketChannel();
+  const { data: user } = useUserProfile();
 
   useEffect(() => {
-    dispatch(
-      updateCurrentChannel({
-        current_channel: sourceId,
-      })
-    );
-  }, [sourceId]);
+    if (sourceId) {
+      setCurrentChannel(sourceId);
+    }
+  }, [sourceId, setCurrentChannel]);
   return (
     <div>
       <div
@@ -56,11 +54,7 @@ const NotificationCommentContainer: React.FC<
             transform: "translateY(-50%)",
           }}
           onClick={() =>
-            dispatch(
-              updateCurrentChannel({
-                current_channel: standardizePersonalRoomName(user.username),
-              })
-            )
+            setCurrentChannel(standardizePersonalRoomName(user?.username || ""))
           }
         >
           <Image src={arrowLeftBrand} alt="Back" />

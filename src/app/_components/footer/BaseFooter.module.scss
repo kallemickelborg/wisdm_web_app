@@ -1,0 +1,31 @@
+// Base Footer Styles
+.baseFooter {
+  width: 100%;
+  position: relative;
+}
+
+// Dashboard Variant - Contains NavigationBar
+.variantDashboard {
+  // NavigationBar is positioned fixed, so footer just needs to provide space
+  // The actual NavigationBar styles are in NavigationBar.module.scss
+  position: relative;
+  min-height: 100px; // Match NavigationBar height
+}
+
+// Auth Variant - Footer for auth/onboarding pages
+// Can contain custom children or nextWrapper (button + info text)
+.variantAuth {
+  padding: vars.$padding-medium;
+  text-align: center;
+  background-color: transparent;
+
+  p {
+    @include vars.use-font("regular");
+    font-size: vars.$font-size-body-small;
+    color: vars.$color-font-body;
+    margin: 0;
+  }
+
+  // When nextWrapper is used, styles come from auth.module.scss
+  // (.nextWrapper, .infoText classes)
+}

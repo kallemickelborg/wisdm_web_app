@@ -1,6 +1,8 @@
+// TODO: REMOVE THIS FILE
+
 /**
  * Authentication Storage Utilities
- * 
+ *
  * Handles persistent storage of authentication state with proper
  * security considerations and cross-tab synchronization.
  */
@@ -29,6 +31,7 @@ export interface UserProfile {
   last_sign_in_time: string | null;
   disabled: boolean | null;
   partial_data: boolean | null;
+  traits: string[] | null;
 }
 
 const AUTH_STORAGE_KEY = "wisdm_auth_data";
@@ -48,7 +51,7 @@ const storage = {
       return null;
     }
   },
-  
+
   set: (key: string, value: string): void => {
     if (typeof window === "undefined") return;
     try {
@@ -57,7 +60,7 @@ const storage = {
       console.warn(`Failed to write to localStorage: ${error}`);
     }
   },
-  
+
   remove: (key: string): void => {
     if (typeof window === "undefined") return;
     try {
@@ -66,7 +69,7 @@ const storage = {
       console.warn(`Failed to remove from localStorage: ${error}`);
     }
   },
-  
+
   clear: (): void => {
     if (typeof window === "undefined") return;
     try {
@@ -88,20 +91,22 @@ export const authStorage = {
     try {
       const serialized = JSON.stringify(authData);
       storage.set(AUTH_STORAGE_KEY, serialized);
-      
+
       // Dispatch storage event for cross-tab synchronization
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new StorageEvent("storage", {
-          key: AUTH_STORAGE_KEY,
-          newValue: serialized,
-          storageArea: localStorage,
-        }));
+        window.dispatchEvent(
+          new StorageEvent("storage", {
+            key: AUTH_STORAGE_KEY,
+            newValue: serialized,
+            storageArea: localStorage,
+          })
+        );
       }
     } catch (error) {
       console.error("Failed to save auth data:", error);
     }
   },
-  
+
   /**
    * Get authentication data from localStorage
    */
@@ -109,16 +114,16 @@ export const authStorage = {
     try {
       const stored = storage.get(AUTH_STORAGE_KEY);
       if (!stored) return null;
-      
+
       const authData: AuthData = JSON.parse(stored);
-      
+
       // Check if token is expired (with buffer)
-      if (Date.now() >= (authData.expiresAt - AUTH_EXPIRY_BUFFER)) {
+      if (Date.now() >= authData.expiresAt - AUTH_EXPIRY_BUFFER) {
         console.log("Stored auth token is expired, removing...");
         authStorage.clearAuthData();
         return null;
       }
-      
+
       return authData;
     } catch (error) {
       console.error("Failed to parse stored auth data:", error);
@@ -126,24 +131,26 @@ export const authStorage = {
       return null;
     }
   },
-  
+
   /**
    * Clear authentication data
    */
   clearAuthData: (): void => {
     storage.remove(AUTH_STORAGE_KEY);
     storage.remove(USER_PROFILE_STORAGE_KEY);
-    
+
     // Dispatch storage event for cross-tab synchronization
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new StorageEvent("storage", {
-        key: AUTH_STORAGE_KEY,
-        newValue: null,
-        storageArea: localStorage,
-      }));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: AUTH_STORAGE_KEY,
+          newValue: null,
+          storageArea: localStorage,
+        })
+      );
     }
   },
-  
+
   /**
    * Check if user is authenticated (has valid token)
    */
@@ -151,7 +158,7 @@ export const authStorage = {
     const authData = authStorage.getAuthData();
     return authData !== null;
   },
-  
+
   /**
    * Get current user's ID token
    */
@@ -159,16 +166,16 @@ export const authStorage = {
     const authData = authStorage.getAuthData();
     return authData?.idToken || null;
   },
-  
+
   /**
    * Check if token needs refresh (within 10 minutes of expiry)
    */
   needsRefresh: (): boolean => {
     const authData = authStorage.getAuthData();
     if (!authData) return false;
-    
+
     const refreshBuffer = 10 * 60 * 1000; // 10 minutes
-    return Date.now() >= (authData.expiresAt - refreshBuffer);
+    return Date.now() >= authData.expiresAt - refreshBuffer;
   },
 };
 
@@ -187,7 +194,7 @@ export const userProfileStorage = {
       console.error("Failed to save user profile:", error);
     }
   },
-  
+
   /**
    * Get user profile data
    */
@@ -195,7 +202,7 @@ export const userProfileStorage = {
     try {
       const stored = storage.get(USER_PROFILE_STORAGE_KEY);
       if (!stored) return null;
-      
+
       return JSON.parse(stored);
     } catch (error) {
       console.error("Failed to parse stored user profile:", error);
@@ -203,14 +210,14 @@ export const userProfileStorage = {
       return null;
     }
   },
-  
+
   /**
    * Clear user profile data
    */
   clearUserProfile: (): void => {
     storage.remove(USER_PROFILE_STORAGE_KEY);
   },
-  
+
   /**
    * Update specific profile fields
    */
@@ -230,9 +237,11 @@ export const authSyncUtils = {
   /**
    * Listen for auth changes across tabs
    */
-  onAuthChange: (callback: (authData: AuthData | null) => void): (() => void) => {
+  onAuthChange: (
+    callback: (authData: AuthData | null) => void
+  ): (() => void) => {
     if (typeof window === "undefined") return () => {};
-    
+
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === AUTH_STORAGE_KEY) {
         try {
@@ -244,15 +253,15 @@ export const authSyncUtils = {
         }
       }
     };
-    
+
     window.addEventListener("storage", handleStorageChange);
-    
+
     // Return cleanup function
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
   },
-  
+
   /**
    * Trigger auth sync across tabs
    */
@@ -274,16 +283,16 @@ export const authSecurityUtils = {
   isValidTokenFormat: (token: string): boolean => {
     // Basic JWT format check (header.payload.signature)
     const parts = token.split(".");
-    return parts.length === 3 && parts.every(part => part.length > 0);
+    return parts.length === 3 && parts.every((part) => part.length > 0);
   },
-  
+
   /**
    * Get token expiry time from JWT (without verification)
    */
   getTokenExpiry: (token: string): number | null => {
     try {
       if (!authSecurityUtils.isValidTokenFormat(token)) return null;
-      
+
       const payload = JSON.parse(atob(token.split(".")[1]));
       return payload.exp ? payload.exp * 1000 : null; // Convert to milliseconds
     } catch (error) {
@@ -291,7 +300,7 @@ export const authSecurityUtils = {
       return null;
     }
   },
-  
+
   /**
    * Check if running in secure context
    */
@@ -311,20 +320,20 @@ export const migrationUtils = {
   migrateFromRedux: (reduxAuthState: { idToken: string | null }): void => {
     if (reduxAuthState.idToken && !authStorage.isAuthenticated()) {
       console.log("Migrating auth state from Redux to persistent storage");
-      
+
       // Create auth data from Redux state
       // Note: We'll need to get fresh token data from Firebase
       // This is just a placeholder for the migration
       console.log("Redux migration would happen here");
     }
   },
-  
+
   /**
    * Clear legacy storage keys
    */
   clearLegacyStorage: (): void => {
     // Clear any old storage keys that might exist
     const legacyKeys = ["auth_token", "user_data", "wisdm_token"];
-    legacyKeys.forEach(key => storage.remove(key));
+    legacyKeys.forEach((key) => storage.remove(key));
   },
 };
