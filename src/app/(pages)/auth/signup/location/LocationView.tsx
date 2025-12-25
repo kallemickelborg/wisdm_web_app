@@ -59,7 +59,7 @@ const LocationView = () => {
   return (
     <div className={styles.loginWrapper}>
       <div className={styles.loginContainer}>
-        <LoadingOverlay isVisible={isLoading} />
+        {/* <LoadingOverlay isVisible={isLoading} /> */}
         <BaseHeader
           title="Where do you live?"
           subtitle="This helps us personalize your feed with more relevant content."

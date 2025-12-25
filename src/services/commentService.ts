@@ -2,7 +2,7 @@
 
 import { apiClient } from "./api/apiClient";
 import { CrudOperations } from "./api/CrudOperations";
-import type { Comment, CommentThread } from "@/models";
+import type { Comment, CommentThread, TrendingComment } from "@/models";
 
 interface CommentFilters {
   order_by?: "ASC" | "DESC";
@@ -49,9 +49,9 @@ export const commentService = {
    * Fetch trending comments
    * Backend: GET /api/comments/get_trending
    */
-  async fetchTrendingComments(limit: number = 10): Promise<Comment[]> {
+  async fetchTrendingComments(limit: number = 10): Promise<TrendingComment[]> {
     const queryParams = apiClient.buildQueryString({ limit });
-    const response = await apiClient.get<{ comments: Comment[] }>(
+    const response = await apiClient.get<{ comments: TrendingComment[] }>(
       `/comments/get_trending${queryParams}`
     );
     return response.comments || [];
@@ -73,6 +73,28 @@ export const commentService = {
     });
     const response = await apiClient.get<{ comments: Comment[] }>(
       `/comments/get_recent${queryParams}`
+    );
+    return response.comments || [];
+  },
+
+  /**
+   * Fetch comments by reference (e.g., timeline, event)
+   * Backend: GET /api/comments/get/comments
+   */
+  async fetchCommentsByReference(
+    referenceId: string,
+    referenceType: string,
+    filters?: CommentFilters
+  ): Promise<Comment[]> {
+    const queryParams = apiClient.buildQueryString({
+      reference_id: referenceId,
+      reference_type: referenceType,
+      order_by: filters?.order_by || "DESC",
+      offset: filters?.offset || 0,
+      limit: filters?.limit || 20,
+    });
+    const response = await apiClient.get<{ comments: Comment[] }>(
+      `/comments/get/comments${queryParams}`
     );
     return response.comments || [];
   },
@@ -104,5 +126,43 @@ export const commentService = {
     commentId: string
   ): Promise<{ message: string; id: string }> {
     return commentCrud.delete(commentId);
+  },
+
+  /**
+   * Vote on a comment
+   * Backend: POST /api/votes/post/vote
+   */
+  async voteComment(commentId: string, vote: boolean | null): Promise<Comment> {
+    return apiClient.post<Comment>("/votes/post/vote", {
+      comment_id: commentId,
+      vote,
+    });
+  },
+
+  /**
+   * Remove vote from a comment
+   * Backend: DELETE /api/votes/delete/vote
+   */
+  async removeVote(commentId: string): Promise<{ message: string }> {
+    const queryParams = apiClient.buildQueryString({
+      comment_id: commentId,
+    });
+    return apiClient.delete<{ message: string }>(
+      `/votes/delete/vote${queryParams}`
+    );
+  },
+
+  /**
+   * Report a comment
+   * Backend: POST /api/comments/report
+   */
+  async reportComment(
+    commentId: string,
+    reason: string
+  ): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>("/comments/report", {
+      comment_id: commentId,
+      reason,
+    });
   },
 };

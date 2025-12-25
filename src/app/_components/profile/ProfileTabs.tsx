@@ -2,7 +2,12 @@
 import React from "react";
 
 // API/Database Imports
-import { User, SavedTopic, Wisdm, Comment } from "@/types";
+import type { Comment } from "@/models";
+
+// TODO: Define User, SavedTopic, Wisdm types
+type User = any;
+type SavedTopic = any;
+type Wisdm = any;
 
 // Component Imports
 import BaseCard from "@/app/_components/cards/BaseCard";
@@ -28,18 +33,23 @@ import styles from "@/app/_components/profile/ProfileTabs.module.scss";
 const CommentsTab: React.FC<{ comments: Comment[] }> = ({ comments }) => {
   return (
     <div className={styles.pageWrapper}>
-      {comments.map((comment, index) => (
-        <BaseCard
-          key={index}
-          variant="activity"
-          title={comment.timeline_title}
-          content={comment.body}
-          metadata={{
-            upvotes: comment.vote_count || 0,
-            comments: comment.comment_count || 0,
-          }}
-        />
-      ))}
+      {comments.map((comment, index) => {
+        const upvoteCount = comment.upvote_count || 0;
+        const downvoteCount = comment.downvote_count || 0;
+        const vote_count = upvoteCount - downvoteCount;
+        return (
+          <BaseCard
+            key={index}
+            variant="activity"
+            title={comment.thread_id} // Use thread_id instead of timeline_title
+            content={comment.body}
+            metadata={{
+              upvotes: vote_count,
+              comments: comment.comment_count || 0,
+            }}
+          />
+        );
+      })}
     </div>
   );
 };

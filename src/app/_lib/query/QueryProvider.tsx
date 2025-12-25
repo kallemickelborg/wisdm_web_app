@@ -3,6 +3,8 @@
 import React, { ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ApiError } from "@/services/api/apiClient";
+import { authStorage } from "@/app/_lib/auth/authStorage";
 import "./devtools.css";
 
 interface QueryProviderProps {
@@ -22,9 +24,17 @@ function createQueryClient() {
 
         // Retry configuration
         retry: (failureCount, error: any) => {
-          if (error?.status >= 400 && error?.status < 500) {
+          // Check if error is an ApiError with status
+          const status =
+            error?.status || (error instanceof ApiError ? error.status : 0);
+
+          // Don't retry on client errors (400-499)
+          if (status >= 400 && status < 500) {
+            console.log(`❌ Not retrying query due to ${status} error`);
             return false;
           }
+
+          // Retry up to 3 times for other errors
           return failureCount < 3;
         },
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -40,8 +50,12 @@ function createQueryClient() {
       mutations: {
         // Retry configuration for mutations
         retry: (failureCount, error: any) => {
+          // Check if error is an ApiError with status
+          const status =
+            error?.status || (error instanceof ApiError ? error.status : 0);
+
           // Don't retry mutations on client errors
-          if (error?.status >= 400 && error?.status < 500) {
+          if (status >= 400 && status < 500) {
             return false;
           }
           // Retry once for server errors
@@ -50,6 +64,9 @@ function createQueryClient() {
         networkMode: "online",
       },
     },
+    // Global error handler
+    queryCache: undefined,
+    mutationCache: undefined,
   });
 }
 

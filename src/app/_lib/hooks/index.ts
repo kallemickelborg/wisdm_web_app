@@ -13,6 +13,7 @@ export {
   useUserProfile,
   useCreateUser,
   useUpdateUser,
+  useUpdateUserInterests,
   useDeleteUser,
 } from "./useUser";
 

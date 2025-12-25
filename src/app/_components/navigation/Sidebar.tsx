@@ -1,22 +1,24 @@
 // System Imports
-import React, { useContext, useState } from "react";
 import Image from "next/image";
+import React, { useContext, useState } from "react";
 
 // API/Database Imports
-import { onSignOut } from "@/app/_lib/firebase/auth/auth_sign_out";
 import { ThemeContext } from "@/app/_contexts/ThemeContext";
+import { useUserProfile } from "@/app/_lib/hooks";
+import { useAuth } from "@/app/_lib/hooks/useAuth";
 
 // Component Imports
+import AccountSettings from "@/app/_components/profile/AccountSettings";
 import BaseToggle from "@/app/_components/toggles/BaseToggle";
 
 // Stylesheet Imports
 import styles from "@/app/_components/navigation/Sidebar.module.scss";
 
 // Asset Imports
-import wisdmLogoBrand from "@/assets/logos/wisdm_logo_brand.svg";
-import wisdmLogoWhite from "@/assets/logos/wisdm_logo_white.svg";
 import arrowRightBrand from "@/assets/icons/arrow_right_brand.svg";
 import closeIcon from "@/assets/icons/close.svg";
+import wisdmLogoBrand from "@/assets/logos/wisdm_logo_brand.svg";
+import wisdmLogoWhite from "@/assets/logos/wisdm_logo_white.svg";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,8 +26,35 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { logout } = useAuth();
   const [isPushNotificationsOn, setIsPushNotificationsOn] = useState(false);
+
+  const {
+    data: user,
+    isLoading: profileLoading,
+    error: profileError,
+  } = useUserProfile();
+
+  const toggleAccountSettings = () => {
+    setShowAccountSettings(!showAccountSettings);
+  };
+
+  const userSettingsData = {
+    username: user?.username || "",
+    email: user?.email || "",
+    photo_url: user?.photo_url,
+    name: user?.name || "",
+    gender: user?.gender || "",
+    locality: user?.locality || "",
+    interests: user?.interests || [],
+    traits: user?.traits || [],
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <div
@@ -43,14 +72,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <Image src={closeIcon} alt="Close" />
         </p>
       </header>
-      <h2>Privacy and Security</h2>
+      <h2>Account Settings</h2>
       <div className={styles.sidebarSection}>
-        <div className={styles.sidebarItem}>
-          <p>Privacy Settings</p>
-          <Image src={arrowRightBrand} alt="Arrow Right" />
-        </div>
-        <div className={styles.sidebarItem}>
-          <p>Security Settings</p>
+        <div className={styles.sidebarItem} onClick={toggleAccountSettings}>
+          <p>Account Settings</p>
           <Image src={arrowRightBrand} alt="Arrow Right" />
         </div>
       </div>
@@ -95,10 +120,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <Image src={arrowRightBrand} alt="Arrow Right" />
         </div>
         <div className={styles.sidebarItem}>
-          <p onClick={onSignOut}>Log Out</p>
+          <p onClick={handleLogout}>Log Out</p>
           <Image src={arrowRightBrand} alt="Arrow Right" />
         </div>
       </div>
+      <AccountSettings
+        user={userSettingsData}
+        onBack={toggleAccountSettings}
+        isOpen={showAccountSettings}
+      />
     </div>
   );
 };

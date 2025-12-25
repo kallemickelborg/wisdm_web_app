@@ -1,8 +1,29 @@
 // Comment models
-export type { Comment, CommentThread } from "./comment";
+export type {
+  Comment,
+  CommentThread,
+  TrendingComment,
+  UpdateComment,
+  CommentsByParentId,
+  CommentGroupByIndex,
+  CommentFilters,
+  CreateCommentRequest,
+  UpdateCommentRequest,
+  DeleteCommentRequest,
+  VoteCommentRequest,
+} from "./comment";
 
 // Timeline models
-export type { Timeline, TimelineResponse } from "./timeline";
+export type {
+  Timeline,
+  TimelineResponse,
+  TimelineWithDetails,
+  TimelinePopupProps,
+  SelectedPopupEvent,
+  TimelineFilters,
+  CreateTimelineRequest,
+  UpdateTimelineRequest,
+} from "./timeline";
 
 // Event models
 export type { Event } from "./event";
@@ -14,7 +35,13 @@ export type { Summary } from "./summary";
 export type { UserProfile, UserTraitsResponse } from "./user";
 
 // Notification models
-export type { Notification, NotificationResponse } from "./notification";
+export type {
+  Notification,
+  NotificationResponse,
+  NotificationFilters,
+  NotificationSettings,
+  MarkNotificationReadRequest,
+} from "./notification";
 
 // Vote models
 export type { Vote } from "./vote";
@@ -25,6 +52,9 @@ export type { Category } from "./category";
 // Trait models
 export type { Trait } from "./trait";
 
+// Image models
+export type { Image } from "./image";
+
 // Auth models
 export type {
   FieldErrors,
@@ -32,3 +62,12 @@ export type {
   ValidationResult,
   FormSubmissionResult,
 } from "./auth";
+
+// Search models
+export type {
+  SearchQuery,
+  SearchResult,
+  SearchResponse,
+  SearchSuggestion,
+  RecentSearch,
+} from "./search";

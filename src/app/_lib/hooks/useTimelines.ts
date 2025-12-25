@@ -149,9 +149,11 @@ export function useCreateTimeline() {
       timelineService.createTimeline(request),
     onSuccess: (newTimeline) => {
       // Invalidate category timelines to refetch
-      if (newTimeline.category_id) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.timelines.byCategory(newTimeline.category_id),
+      if (newTimeline.category_ids && newTimeline.category_ids.length > 0) {
+        newTimeline.category_ids.forEach((categoryId) => {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.timelines.byCategory(categoryId),
+          });
         });
       }
 
@@ -171,7 +173,7 @@ export function useUpdateTimeline() {
 
   return useMutation({
     mutationFn: (request: UpdateTimelineRequest) =>
-      timelineService.updateTimeline(request),
+      timelineService.updateTimeline(request.id, request),
     onSuccess: (updatedTimeline) => {
       // Update the specific timeline in cache
       queryClient.setQueryData(
@@ -180,9 +182,14 @@ export function useUpdateTimeline() {
       );
 
       // Invalidate category timelines
-      if (updatedTimeline.category_id) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.timelines.byCategory(updatedTimeline.category_id),
+      if (
+        updatedTimeline.category_ids &&
+        updatedTimeline.category_ids.length > 0
+      ) {
+        updatedTimeline.category_ids.forEach((categoryId) => {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.timelines.byCategory(categoryId),
+          });
         });
       }
     },

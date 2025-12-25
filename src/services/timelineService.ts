@@ -26,10 +26,41 @@ export const timelineService = {
     return response.timelines || [];
   },
 
-  async fetchTimelinesByCategory(categoryId: string): Promise<Timeline[]> {
-    const queryParams = apiClient.buildQueryString({ category_id: categoryId });
+  async fetchTimelinesByCategory(
+    categoryId: string,
+    filters?: { offset?: number; limit?: number }
+  ): Promise<Timeline[]> {
+    const queryParams = apiClient.buildQueryString({
+      category_id: categoryId,
+      offset: filters?.offset,
+      limit: filters?.limit,
+    });
     const response = await apiClient.get<TimelineResponse>(
       `/timelines/get/timelines_by_category${queryParams}`
+    );
+    return response.timelines || [];
+  },
+
+  async fetchTimelineById(timelineId: string): Promise<Timeline> {
+    return this.fetchTimeline(timelineId);
+  },
+
+  async fetchTimelineDetails(timelineId: string): Promise<Timeline> {
+    return this.fetchTimeline(timelineId);
+  },
+
+  async fetchFeaturedTimelines(limit: number = 10): Promise<Timeline[]> {
+    const queryParams = apiClient.buildQueryString({ limit });
+    const response = await apiClient.get<TimelineResponse>(
+      `/timelines/get/featured${queryParams}`
+    );
+    return response.timelines || [];
+  },
+
+  async fetchTrendingTimelines(limit: number = 10): Promise<Timeline[]> {
+    const queryParams = apiClient.buildQueryString({ limit });
+    const response = await apiClient.get<TimelineResponse>(
+      `/timelines/get/trending${queryParams}`
     );
     return response.timelines || [];
   },

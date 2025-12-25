@@ -25,8 +25,18 @@ const imageMap: { [key: string]: any } = {
   "explore_feed_2.png": explore_feed_2,
 };
 
+interface VoteItem {
+  id: string;
+  image: string;
+  title: string;
+  description: string;
+  vote: boolean | null;
+}
+
 const VoteView = () => {
-  const [voteItems, setVoteItems] = useState(placeholderData.voteItems);
+  const [voteItems, setVoteItems] = useState<VoteItem[]>(
+    placeholderData.voteItems
+  );
 
   const handleVote = (id: string, vote: boolean) => {
     setVoteItems((prevItems) =>

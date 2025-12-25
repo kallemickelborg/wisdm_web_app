@@ -6,7 +6,6 @@ import {
   validatePasswordStrength,
   validatePasswordsMatch,
 } from "@/app/_lib/validation/onboardingValidation";
-import { generatePassword } from "@/app/_lib/user/password/generatePassword";
 import type { SignupFormState, FormSubmissionResult } from "@/models";
 
 interface UseSignupFormReturn {
@@ -17,8 +16,6 @@ interface UseSignupFormReturn {
   setEmail: (value: string) => void;
   setPassword: (value: string) => void;
   setDuplicatePassword: (value: string) => void;
-  useSuggestedPassword: () => void;
-  generateNewPassword: () => void;
 
   // Validation
   validateForm: () => boolean;
@@ -35,25 +32,6 @@ interface UseSignupFormReturn {
   clearFormError: () => void;
 }
 
-/**
- * useSignupForm - Custom hook for email/password signup form
- *
- * Handles:
- * - Form state management
- * - Real-time validation
- * - Password suggestion and generation
- * - Firebase signup integration
- * - Error handling
- *
- * @example
- * const {
- *   formState,
- *   setEmail,
- *   setPassword,
- *   handleSubmit,
- *   isLoading
- * } = useSignupForm();
- */
 export const useSignupForm = (): UseSignupFormReturn => {
   const router = useRouter();
 
@@ -62,7 +40,6 @@ export const useSignupForm = (): UseSignupFormReturn => {
     email: "",
     password: "",
     duplicatePassword: "",
-    suggestedPassword: generatePassword(),
     emailError: "",
     passwordError: "",
     duplicatePasswordError: "",
@@ -112,32 +89,6 @@ export const useSignupForm = (): UseSignupFormReturn => {
         duplicatePasswordError,
       };
     });
-    setFormError(null);
-  }, []);
-
-  // Use suggested password
-  const useSuggestedPassword = useCallback(() => {
-    setFormState((prev) => ({
-      ...prev,
-      password: prev.suggestedPassword,
-      duplicatePassword: prev.suggestedPassword,
-      passwordError: "",
-      duplicatePasswordError: "",
-    }));
-    setFormError(null);
-  }, []);
-
-  // Generate new password
-  const generateNewPassword = useCallback(() => {
-    const newPassword = generatePassword();
-    setFormState((prev) => ({
-      ...prev,
-      suggestedPassword: newPassword,
-      password: "",
-      duplicatePassword: "",
-      passwordError: "",
-      duplicatePasswordError: "",
-    }));
     setFormError(null);
   }, []);
 
@@ -281,8 +232,6 @@ export const useSignupForm = (): UseSignupFormReturn => {
     setEmail,
     setPassword,
     setDuplicatePassword,
-    useSuggestedPassword,
-    generateNewPassword,
     validateForm,
     isFormValid,
     handleSubmit,

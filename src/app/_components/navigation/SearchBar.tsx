@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import BaseCard from "@/app/_components/cards/BaseCard";
-import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
+import LoadingOverlay from "@/app/_components/loading/LoadingOverlay";
 import searchIcon from "@/assets/icons/search.svg";
 import styles from "./SearchBar.module.scss";
 import timeline_1 from "@/assets/images/timeline_1.png";
@@ -90,7 +90,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             >
               {isSearching ? (
                 <div className={styles.dropdownLoading}>
-                  <LoadingSpinner />
+                  <LoadingOverlay />
                 </div>
               ) : error ? (
                 <div className={styles.dropdownError}>

@@ -1,68 +1,66 @@
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { motion } from "motion/react";
-import LoadingSpinner from "./LoadingSpinner";
 import wisdmLogo from "@/assets/logos/wisdm_logo_brand.svg";
+import { motion } from "motion/react";
+import Image from "next/image";
+import React from "react";
 import styles from "./LoadingOverlay.module.scss";
+export type LoadingOverlayVariant = "logo" | "dots";
 
 interface LoadingOverlayProps {
-  isVisible: boolean;
-  timeout?: number;
+  variant?: LoadingOverlayVariant;
+  text?: string;
+  className?: string;
+  isVisible?: boolean;
 }
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
-  isVisible,
-  timeout = 8000, // Default timeout of 8 seconds
+  text,
+  variant = "logo",
+  className = "",
 }) => {
-  const [forceHide, setForceHide] = useState(false);
+  // Loader variant
+  const renderOverlay = () => {
+    switch (variant) {
+      case "dots":
+        return (
+          <div className={styles.dotsContainer}>
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className={styles.dot}
+                animate={{ y: [0, -30 / 3, 0] }}
+                transition={{
+                  duration: 1.5,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  delay: i * 0.15,
+                }}
+              />
+            ))}
+          </div>
+        );
 
-  useEffect(() => {
-    // Reset force hide when visibility changes
-    if (isVisible) {
-      setForceHide(false);
-
-      // Set a timeout to force hide the overlay if it stays visible too long
-      const timer = setTimeout(() => {
-        setForceHide(true);
-        console.warn("LoadingOverlay timed out after", timeout, "ms");
-      }, timeout);
-
-      return () => clearTimeout(timer);
+      case "logo":
+      default:
+        return (
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{
+              duration: 2.5,
+              ease: "easeInOut",
+              repeat: Infinity,
+            }}
+          >
+            <Image src={wisdmLogo} alt="Wisdm Logo" priority />
+          </motion.div>
+        );
     }
-  }, [isVisible, timeout]);
-
-  if (!isVisible || forceHide) return null;
+  };
 
   return (
-    <motion.div
-      className={styles.overlayContainer}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className={styles.contentContainer}>
-        <motion.div
-          className={styles.logoContainer}
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut",
-          }}
-        >
-          <Image
-            src={wisdmLogo}
-            alt="Wisdm Logo"
-            width={120}
-            height={120}
-            priority
-          />
-        </motion.div>
-        <LoadingSpinner />
-      </div>
-    </motion.div>
+    <div className={`${styles.loadingOverlayContainer} ${className}`}>
+      {renderOverlay()}
+      {text && <p className={styles.loadingText}>{text}</p>}
+    </div>
   );
 };
 

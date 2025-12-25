@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import styles from "./TimelinePopup.module.scss";
 import BaseCard from "@/app/_components/cards/BaseCard";
-import { TimelinePopupProps } from "@/types";
+import type { TimelinePopupProps } from "@/models";
 
 export type TimelineEvent = {
   title: string;
@@ -23,15 +23,17 @@ const TimelinePopup: React.FC<TimelinePopupProps> = ({
     narrativeBias === "left"
       ? "left"
       : narrativeBias === "right"
-      ? "right"
-      : "event"
+        ? "right"
+        : "event"
   );
 
   const isClosingRef = useRef(false);
 
   const getEventData = () => {
     if (!timelineData || event.index === undefined) return null;
-    return timelineData.timeline[event.index];
+    // Flatten the 2D events array and find the event by index
+    const flatEvents = timelineData.events.flat();
+    return flatEvents.find((e) => e.event_index === event.index);
   };
 
   const eventData = getEventData();
@@ -102,8 +104,8 @@ const TimelinePopup: React.FC<TimelinePopupProps> = ({
               activeTab === "left"
                 ? styles.leftPerspectivePopup
                 : activeTab === "right"
-                ? styles.rightPerspectivePopup
-                : ""
+                  ? styles.rightPerspectivePopup
+                  : ""
             }`}
             onClick={(e) => e.stopPropagation()}
             transition={{
@@ -132,7 +134,7 @@ const TimelinePopup: React.FC<TimelinePopupProps> = ({
                   layoutId={`event-title-${event.eventId || event.index}`}
                   transition={{ type: "tween", duration: 0.3 }}
                 >
-                  {eventData ? eventData.event : event.title}
+                  {eventData ? eventData.title : event.title}
                 </motion.h2>
                 {eventData?.date && (
                   <motion.div

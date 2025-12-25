@@ -8,7 +8,7 @@ import styles from "@/app/_components/comments/VoteContainer/VoteContainer.modul
 import { useAuth } from "@/app/_lib/hooks/useAuth";
 import { socket } from "@/app/_lib/socket/socket";
 
-import { Comment } from "@/types";
+import type { Comment } from "@/models";
 import { CommentActions } from "../CommentContainer/commentReducer";
 import { standardizedPath } from "@/app/_lib/utils/path";
 
@@ -24,7 +24,8 @@ const VoteContainer: React.FC<VoteContainerProps> = ({
   commentDispatch,
 }) => {
   const { idToken } = useAuth();
-  const { vote, vote_count, id, is_vote_bouncing } = comment;
+  const { vote, upvote_count, downvote_count, id, is_vote_bouncing } = comment;
+  const vote_count = (upvote_count || 0) - (downvote_count || 0);
 
   const path = standardizedPath();
 

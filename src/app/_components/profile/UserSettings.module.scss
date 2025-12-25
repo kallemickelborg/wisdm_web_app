@@ -1,13 +1,13 @@
 .userSettingsContainer {
-  display: flex;
+  display: none;
   flex-direction: column;
-  gap: vars.$gap-medium;
+  gap: vars.$gap-large;
   background-color: vars.$color-background;
   overflow-y: auto;
   padding: vars.$padding-medium;
   height: 100vh;
   position: fixed;
-  right: -100%;
+  left: 0;
   top: 0;
   transition: vars.$transition-duration-long;
   width: 100%;
@@ -16,6 +16,7 @@
   pointer-events: none;
 
   &.active {
+    display: flex;
     right: 0;
     pointer-events: auto;
   }
@@ -73,5 +74,137 @@
 
   .toggleContainer {
     align-self: end;
+  }
+}
+
+.backButton {
+  position: absolute;
+  top: vars.$padding-medium;
+  left: vars.$padding-medium;
+  cursor: pointer;
+  z-index: 10;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Settings Sections
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$gap-medium;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    color: vars.$color-brand;
+    font-size: vars.$font-size-header-medium;
+  }
+}
+
+// Masonry Grid for Categories
+.masonryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: vars.$gap-medium;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+.categoryOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: vars.$padding-small;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  border-radius: 0 0 vars.$radius-large vars.$radius-large;
+
+  h3 {
+    color: white;
+    font-size: vars.$font-size-body-medium;
+    text-align: center;
+  }
+}
+
+// Traits List
+.traitsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: vars.$gap-small;
+}
+
+.traitChip {
+  padding: vars.$padding-small vars.$padding-medium;
+  background-color: vars.$color-brand;
+  color: white;
+  border-radius: vars.$radius-large;
+  font-size: vars.$font-size-body-small;
+
+  span {
+    color: white;
+    font-size: vars.$font-size-body-small;
+  }
+}
+
+// Empty State
+.emptyState {
+  color: vars.$color-font-body;
+  font-style: italic;
+  text-align: center;
+  padding: vars.$padding-large;
+}
+
+// Categories Grid (shared with UserSettings masonry grid)
+.categoriesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: vars.$gap-medium;
+}
+
+// Category Card (used in selection modal)
+.categoryCard {
+  align-items: left;
+  border-radius: vars.$radius-small;
+  box-sizing: border-box;
+  cursor: pointer;
+  flex-direction: column;
+  gap: vars.$gap-medium;
+  width: 175px;
+
+  &.selected {
+    opacity: 0.5;
+  }
+
+  .categoryImage {
+    border-radius: vars.$radius-small;
+    height: auto;
+    width: 100%;
+
+    &.selected {
+      opacity: 0.5;
+    }
+  }
+
+  .categoryContainer {
+    position: relative;
+  }
+
+  .categoryOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    border-radius: 0 0 vars.$radius-medium vars.$radius-medium;
   }
 }

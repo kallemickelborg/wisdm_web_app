@@ -1,19 +1,16 @@
 // src/app/layout.tsx
 "use client";
 
-import React, {
-  ReactNode,
-  useEffect,
-  useState,
-  createContext,
-  useContext,
-} from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 import { usePathname, useRouter } from "next/navigation";
 
 // WebSocket Context Provider & Hook
 import { useWebSocket, socket } from "@/app/_lib/socket/socket";
 import { useWebSocketChannel } from "@/app/_contexts/WebSocketChannelContext";
+
+// Sidebar Context
+import { SidebarContext } from "@/app/_contexts/SidebarContext";
 
 // Error Boundary Components
 import { ErrorBoundary } from "@/app/_components/errors/ErrorBoundary";
@@ -32,30 +29,13 @@ import Sidebar from "@/app/_components/navigation/Sidebar";
 
 const routes = ["home", "explore", "profile", "vote", "notifications"];
 
-// Create a context for sidebar state
-interface SidebarContextType {
-  isOpen: boolean;
-  toggleSidebar: () => void;
-  openSidebar: () => void;
-  closeSidebar: () => void;
-}
-
-export const SidebarContext = createContext<SidebarContextType>({
-  isOpen: false,
-  toggleSidebar: () => {},
-  openSidebar: () => {},
-  closeSidebar: () => {},
-});
-
-// Custom hook to use the sidebar context
-export const useSidebar = () => useContext(SidebarContext);
-
 interface LayoutProps {
   children: ReactNode;
 }
 
 const LayoutComponent: React.FC<LayoutProps> = ({ children }) => {
   const [showSidebar, setShowSidebar] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const toggleSidebar = () => setShowSidebar(!showSidebar);
   const openSidebar = () => setShowSidebar(true);
   const closeSidebar = () => setShowSidebar(false);
@@ -65,6 +45,11 @@ const LayoutComponent: React.FC<LayoutProps> = ({ children }) => {
   const { isConnected, joinRoom, leaveRoom } = useWebSocket();
   const { currentChannel } = useWebSocketChannel();
   const queryClient = useQueryClient();
+
+  // Prevent hydration mismatch by only rendering client-side components after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Fetch notifications using TanStack Query hook
   const { data: notificationsResponse } = useNotifications();
@@ -123,10 +108,11 @@ const LayoutComponent: React.FC<LayoutProps> = ({ children }) => {
         closeSidebar,
       }}
     >
-      <div className={styles.onboardingWrapper}>
+      <div className={styles.onboardingWrapper} suppressHydrationWarning>
         {children}
         {shouldShowNavBar && <BaseFooter variant="dashboard" />}
-        <Sidebar isOpen={showSidebar} onClose={closeSidebar} />
+        {/* Only render Sidebar after client-side mount to prevent hydration mismatch */}
+        {isMounted && <Sidebar isOpen={showSidebar} onClose={closeSidebar} />}
       </div>
     </SidebarContext.Provider>
   );

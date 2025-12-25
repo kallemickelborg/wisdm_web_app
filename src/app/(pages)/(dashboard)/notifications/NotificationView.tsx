@@ -9,7 +9,7 @@ import styles from "@/app/(pages)/(dashboard)/notifications/Notifications.module
 // Component Imports
 import BaseHeader from "@/app/_components/header";
 import BaseCard from "@/app/_components/cards/BaseCard";
-import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
+import LoadingOverlay from "@/app/_components/loading/LoadingOverlay";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ArrowRightBrand from "@/assets/icons/arrow_right_brand.svg";
@@ -32,7 +32,7 @@ const NotificationView = () => {
       <div className={styles.pageWrapper}>
         {isLoading ? (
           <div className={styles.spinnerWrapper}>
-            <LoadingSpinner />
+            <LoadingOverlay />
           </div>
         ) : (
           <>

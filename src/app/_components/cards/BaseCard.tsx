@@ -69,8 +69,8 @@ const BaseCard: React.FC<BaseCardProps> = ({
         animate: { opacity: 1, y: 0 },
         transition: {
           duration: 0.3,
-          type: "tween",
-          ease: "easeOut",
+          type: "tween" as const,
+          ease: "easeOut" as const,
         },
       }
     : {};
@@ -104,18 +104,22 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
     return (
       <div className={styles.metadata}>
-        {metadata.upvotes !== undefined && (
-          <div className={styles.metadataItem}>
-            <Image src={upvoteIcon} alt="Upvote" width={16} height={16} />
-            <span>{metadata.upvotes}</span>
-          </div>
-        )}
-        {metadata.comments !== undefined && (
-          <div className={styles.metadataItem}>
-            <Image src={commentIcon} alt="Comment" width={16} height={16} />
-            <span>{metadata.comments} comments</span>
-          </div>
-        )}
+        {metadata.upvotes !== undefined &&
+          !isNaN(metadata.upvotes) &&
+          metadata.upvotes !== null && (
+            <div className={styles.metadataItem}>
+              <Image src={upvoteIcon} alt="Upvote" width={16} height={16} />
+              <span>{metadata.upvotes}</span>
+            </div>
+          )}
+        {metadata.comments !== undefined &&
+          !isNaN(metadata.comments) &&
+          metadata.comments !== null && (
+            <div className={styles.metadataItem}>
+              <Image src={commentIcon} alt="Comment" width={16} height={16} />
+              <span>{metadata.comments} comments</span>
+            </div>
+          )}
         {metadata.author && (
           <div className={styles.metadataItem}>
             <span>{metadata.author}</span>

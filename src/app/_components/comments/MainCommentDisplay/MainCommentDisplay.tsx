@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Comment } from "@/types";
+import type { Comment } from "@/models";
 import React, { Dispatch } from "react";
 import { CommentActions } from "../CommentContainer/commentReducer";
 
@@ -27,13 +27,16 @@ const MainCommentDisplay: React.FC<MainCommentDisplayProps> = ({
     thread_id,
     user_photo_url,
     body,
-    deleted,
+    is_deleted,
     updated_at,
     username,
-    vote_count,
+    upvote_count,
+    downvote_count,
     comment_count,
     vote,
   }: Comment = comment;
+
+  const vote_count = (upvote_count || 0) - (downvote_count || 0);
 
   return (
     <div

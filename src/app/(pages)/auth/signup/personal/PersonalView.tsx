@@ -18,8 +18,8 @@ import progressCircle2 from "@/assets/icons/progress_circle_2.svg";
 // Context imports
 import { useSignup } from "@/app/_contexts/SignupContext";
 
-// Firebase imports
-import { onSignOut } from "@/app/_lib/firebase/auth/auth_sign_out";
+// Auth imports
+import { useAuth } from "@/app/_lib/hooks/useAuth";
 
 // Name Moderation
 import {
@@ -46,6 +46,7 @@ const PersonalView = () => {
   const { signupState, setSignupState } = useSignup();
   const personalInfoState = signupState.personalInfo;
   const router = useRouter();
+  const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -214,14 +215,13 @@ const PersonalView = () => {
         <BaseHeader
           title="Tell us a little about yourself"
           variant="auth"
-          backButton={{ href: "/auth/signup", onClick: onSignOut }}
+          backButton={{ href: "/auth/signup", onClick: logout }}
           progressIndicator={{
             current: 2,
             total: 5,
             icon: progressCircle2,
           }}
         />
-
         {inputFieldArray.map((item) => {
           const { name, type, placeholder, value, label } = item;
           return (
@@ -238,11 +238,9 @@ const PersonalView = () => {
             />
           );
         })}
-
         <p className={styles.infoText}>
           Want to go anonymous? You can change it in the settings.
         </p>
-
         <div className={styles.genderWrapper}>
           <label>What is your gender?</label>
           <div className={styles.genderButtons}>
@@ -262,13 +260,11 @@ const PersonalView = () => {
             })}
           </div>
         </div>
-
         <OnboardingErrorSummary
           formError={formError}
           fieldErrors={fieldErrors}
           className="errorSummaryContainer"
         />
-
         <BaseFooter
           variant="auth"
           info="You can customize the visibility of your information in the settings"

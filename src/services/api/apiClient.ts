@@ -41,9 +41,9 @@ class ApiClient {
    * Build headers for request
    */
   private buildHeaders(options: RequestOptions = {}): HeadersInit {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     if (!options.skipAuth) {

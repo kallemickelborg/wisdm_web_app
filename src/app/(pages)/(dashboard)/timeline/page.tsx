@@ -9,11 +9,11 @@ import { standardizePersonalRoomName } from "@/app/_lib/user/name/general";
 import { useUserProfile } from "@/app/_lib/hooks";
 
 // API/Database Imports
-import {
+import type {
   TimelineWithDetails,
   SelectedPopupEvent,
   TimelinePopupProps,
-} from "@/types";
+} from "@/models";
 
 // Component Imports
 import BaseHeader from "@/app/_components/header";
@@ -177,14 +177,14 @@ const Timeline = () => {
             left={{
               title: "Left Perspective",
               content:
-                timelineData?.timeline?.summary?.substring(0, 150) + "..." ||
+                timelineData?.summary?.summary?.substring(0, 150) + "..." ||
                 "Add Event Perspective Summaries",
             }}
             right={{
               title: "Right Perspective",
               content:
-                timelineData?.timeline?.methodology?.substring(0, 150) +
-                  "..." || "Add Event Perspective Summaries",
+                timelineData?.summary?.summary?.substring(0, 150) + "..." ||
+                "Add Event Perspective Summaries",
             }}
             topicStatement={timelineData?.timeline?.topic_statement}
           />

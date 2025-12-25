@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Dispatch } from "react";
-import { Comment } from "@/types";
+import type { Comment } from "@/models";
 import Image from "next/image";
 import userDefaultImage from "@/assets/icons/user_avatar.svg";
 import { getElapsedTime } from "@/app/_lib/utils/time";
@@ -29,13 +29,18 @@ const CommentBody: React.FC<CommentBodyProps> = ({
   const {
     body,
     user_photo_url,
-    vote_count,
+    upvote_count,
+    downvote_count,
     vote,
     username,
     created_at,
     id,
     comment_count,
   } = comment;
+
+  // Calculate net vote count
+  const vote_count = (upvote_count || 0) - (downvote_count || 0);
+
   const [elapsedTime, setElapsedTime] = useState(getElapsedTime(created_at));
   const [isReplying, setIsReplying] = useState<boolean>(false);
 

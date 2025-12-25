@@ -1,6 +1,6 @@
 /**
  * Comment Hooks using TanStack Query
- * 
+ *
  * Provides hooks for comment-related data fetching and mutations:
  * - Fetching comment threads
  * - Creating, updating, deleting comments
@@ -38,7 +38,8 @@ export function useCommentThread(
 ) {
   return useQuery({
     queryKey: [...queryKeys.comments.thread(threadId), startId, filters],
-    queryFn: () => commentService.fetchCommentThread(threadId, startId, filters),
+    queryFn: () =>
+      commentService.fetchCommentThread(threadId, startId, filters),
     enabled: enabled && !!threadId && !!startId,
     ...cacheConfig.comments,
   });
@@ -100,7 +101,11 @@ export function useCommentsByReference(
       filters,
     ],
     queryFn: () =>
-      commentService.fetchCommentsByReference(referenceId, referenceType, filters),
+      commentService.fetchCommentsByReference(
+        referenceId,
+        referenceType,
+        filters
+      ),
     enabled: enabled && !!referenceId && !!referenceType,
     ...cacheConfig.comments,
   });
@@ -146,7 +151,7 @@ export function useUpdateComment() {
 
   return useMutation({
     mutationFn: (request: UpdateCommentRequest) =>
-      commentService.updateComment(request),
+      commentService.updateComment(request.id, request),
     onSuccess: (updatedComment) => {
       // Invalidate all comment queries to refetch
       queryClient.invalidateQueries({
@@ -165,7 +170,7 @@ export function useDeleteComment() {
 
   return useMutation({
     mutationFn: (request: DeleteCommentRequest) =>
-      commentService.deleteComment(request),
+      commentService.deleteComment(request.id),
     onSuccess: () => {
       // Invalidate all comment queries to refetch
       queryClient.invalidateQueries({
@@ -184,7 +189,7 @@ export function useVoteComment() {
 
   return useMutation({
     mutationFn: (request: VoteCommentRequest) =>
-      commentService.voteComment(request),
+      commentService.voteComment(request.comment_id, request.vote),
     onMutate: async (variables) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
@@ -243,8 +248,12 @@ export function useRemoveVote() {
  */
 export function useReportComment() {
   return useMutation({
-    mutationFn: ({ commentId, reason }: { commentId: string; reason: string }) =>
-      commentService.reportComment(commentId, reason),
+    mutationFn: ({
+      commentId,
+      reason,
+    }: {
+      commentId: string;
+      reason: string;
+    }) => commentService.reportComment(commentId, reason),
   });
 }
-

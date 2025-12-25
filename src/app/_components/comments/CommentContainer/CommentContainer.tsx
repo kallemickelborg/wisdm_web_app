@@ -147,11 +147,11 @@ const CommentContainer: React.FC<CommentContainerProps> = ({
 
   return (
     <div id="comment_container" className={styles.commentContainer}>
-      {!commentState.comments[rootCommentId] ? (
+      {!commentState.comments?.[rootCommentId] ? (
         <LoadingComments additionalText="From your mom..." />
       ) : (
         <>
-          {commentState.comments.root && displayMainComment && (
+          {commentState.comments?.root && displayMainComment && (
             <MainCommentDisplay
               comment={commentState.comments.root}
               commentDispatch={commentDispatch}

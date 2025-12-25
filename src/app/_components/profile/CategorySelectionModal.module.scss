@@ -1,0 +1,155 @@
+// Modal Overlay
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: vars.$padding-medium;
+}
+
+// Modal Content
+.modalContent {
+  background-color: vars.$color-background;
+  padding: vars.$padding-large;
+  border-radius: vars.$radius-large;
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: vars.$gap-medium;
+  position: relative;
+  scrollbar-width: none;
+}
+
+// Modal Header
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: vars.$padding-small;
+  border-bottom: 1px solid var(--color-border);
+
+  h2 {
+    color: vars.$color-brand;
+    font-size: vars.$font-size-header-medium;
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: vars.$padding-small;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: vars.$radius-small;
+  transition: background-color vars.$transition-duration-short;
+
+  &:hover {
+    background-color: vars.$color-brand;
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Modal Subtitle
+.modalSubtitle {
+  color: vars.$color-font-body;
+  font-size: vars.$font-size-body-medium;
+  margin: 0;
+}
+
+// Selected Count
+.selectedCount {
+  padding: vars.$padding-small vars.$padding-medium;
+  background-color: vars.$color-brand-light;
+  border-radius: vars.$radius-medium;
+  text-align: center;
+
+  span {
+    color: vars.$color-brand;
+    font-weight: bold;
+    font-size: vars.$font-size-body-medium;
+  }
+}
+
+// Categories Grid (shared with UserSettings masonry grid)
+.categoriesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: vars.$gap-medium;
+  justify-content: center;
+}
+
+// Category Card (used in selection modal)
+.categoryCard {
+  align-items: center;
+  border-radius: vars.$radius-small;
+  box-sizing: border-box;
+  cursor: pointer;
+  flex-direction: column;
+  gap: vars.$gap-medium;
+  width: 175px;
+
+  &.selected {
+    opacity: 0.5;
+  }
+
+  .categoryImage {
+    border-radius: vars.$radius-small;
+    height: auto;
+    width: 100%;
+
+    &.selected {
+      opacity: 0.5;
+    }
+  }
+
+  .categoryContainer {
+    position: relative;
+  }
+
+  .categoryOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    border-radius: 0 0 vars.$radius-medium vars.$radius-medium;
+  }
+
+  // Modal Footer
+  .modalFooter {
+    display: flex;
+    gap: 20px;
+    padding-top: vars.$padding-medium;
+    border-top: 1px solid var(--color-border);
+  }
+
+  // Loading Overlay
+  .loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: vars.$radius-large;
+    z-index: 10;
+  }
+}

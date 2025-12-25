@@ -1,30 +1,40 @@
 "use client";
 
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/_lib/hooks/useAuth";
 import { useUserProfile } from "@/app/_lib/hooks";
-import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
+import { ApiError } from "@/services/api/apiClient";
+import LoadingOverlay from "@/app/_components/loading/LoadingOverlay";
+import { authStorage } from "@/app/_lib/auth/authStorage";
+
+// Stylesheet Imports
+import styles from "@/app/(pages)/auth/auth.module.scss";
 
 interface AuthWrapperProps {
   children: ReactNode;
 }
 
-/**
- * AuthWrapper - Handles authentication-based routing and loading states
- *
- * Responsibilities:
- * - Redirect unauthenticated users to login page
- * - Redirect authenticated users away from login page
- * - Show loading states during auth check and profile fetch
- * - Handle partial signup completion redirects
- */
 export default function AuthWrapper({ children }: AuthWrapperProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { data: profile, isLoading: profileLoading } = useUserProfile();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    error: profileError,
+  } = useUserProfile();
+
+  // Prevent infinite logout loops
+  const logoutInProgressRef = useRef(false);
+
+  // Optimistic auth check - synchronously check storage for immediate routing
+  // This prevents the URL from lingering on /auth while the async query loads
+  const [hasStoredAuth] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return authStorage.isAuthenticated();
+  });
 
   /**
    * Check if a path is public (doesn't require authentication)
@@ -36,13 +46,42 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   };
 
   /**
-   * Redirect authenticated users with partial data to signup completion
+   * Handle 403 errors by logging out the user
+   * Uses a ref to prevent infinite logout loops
    */
   useEffect(() => {
-    if (!authLoading && isAuthenticated && profile?.partial_data) {
+    if (profileError && !logoutInProgressRef.current) {
+      // Check if it's an ApiError with 403 status
+      const is403Error =
+        (profileError instanceof ApiError && profileError.status === 403) ||
+        (profileError as any)?.status === 403;
+
+      if (is403Error) {
+        console.error("❌ 403 error detected in AuthWrapper - logging out");
+        logoutInProgressRef.current = true;
+        logout();
+      }
+    }
+  }, [profileError, logout]);
+
+  /**
+   * Redirect authenticated users with partial data to signup completion
+   * This takes priority over other redirects
+   */
+  useEffect(() => {
+    if (
+      !authLoading &&
+      !profileLoading &&
+      isAuthenticated &&
+      profile?.partial_data &&
+      !pathname?.startsWith("/auth/signup")
+    ) {
+      console.log(
+        "🔄 User has partial data - redirecting to complete onboarding"
+      );
       router.push("/auth/signup/personal");
     }
-  }, [isAuthenticated, authLoading, profile, router]);
+  }, [isAuthenticated, authLoading, profileLoading, profile, pathname, router]);
 
   /**
    * Redirect authenticated users away from login page
@@ -50,13 +89,15 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   useEffect(() => {
     if (
       !authLoading &&
+      !profileLoading &&
       isAuthenticated &&
       pathname?.startsWith("/auth") &&
+      !pathname?.startsWith("/auth/signup") &&
       !profile?.partial_data
     ) {
       router.push("/home");
     }
-  }, [isAuthenticated, authLoading, pathname, profile, router]);
+  }, [isAuthenticated, authLoading, profileLoading, pathname, profile, router]);
 
   /**
    * Redirect unauthenticated users to login page
@@ -68,22 +109,16 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   }, [isAuthenticated, authLoading, pathname, router]);
 
   // Show loading spinner during authentication check ONLY for protected routes
-  if (authLoading && !isPublicPath(pathname)) {
+  // BUT: If we have stored auth, skip the loading spinner and let the user through
+  // This prevents the URL from staying on /auth while the query loads
+  if (authLoading && !isPublicPath(pathname) && !hasStoredAuth) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-        <LoadingSpinner />
-        <p style={{ color: "#666", fontSize: "14px" }}>
-          Checking authentication...
-        </p>
+      <div className={styles.loadingContainer}>
+        <LoadingOverlay
+          size="large"
+          variant="logo"
+          text="Checking authentication..."
+        />
       </div>
     );
   }
@@ -96,20 +131,29 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     !isPublicPath(pathname)
   ) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-        <LoadingSpinner />
-        <p style={{ color: "#666", fontSize: "14px" }}>
-          Loading user profile...
-        </p>
+      <div className={styles.loadingContainer}>
+        <LoadingOverlay
+          size="large"
+          variant="logo"
+          text="Loading user profile..."
+        />
+      </div>
+    );
+  }
+
+  // Show loading spinner if user has partial data and we're redirecting
+  if (
+    isAuthenticated &&
+    profile?.partial_data &&
+    !pathname?.startsWith("/auth/signup")
+  ) {
+    return (
+      <div className={styles.loadingContainer}>
+        <LoadingOverlay
+          size="large"
+          variant="logo"
+          text="Redirecting to complete onboarding..."
+        />
       </div>
     );
   }

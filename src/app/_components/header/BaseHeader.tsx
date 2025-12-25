@@ -9,7 +9,7 @@ import Link from "next/link";
 import SearchBar from "@/app/_components/navigation/SearchBar";
 import InstructionOverlay from "@/app/_components/overlay/InstructionOverlay";
 import BaseToggle from "@/app/_components/toggles/BaseToggle";
-import { useSidebar } from "@/app/(pages)/(dashboard)/layout";
+import { useSidebar } from "@/app/_contexts/SidebarContext";
 import { ThemeContext } from "@/app/_contexts/ThemeContext";
 
 // Type Imports

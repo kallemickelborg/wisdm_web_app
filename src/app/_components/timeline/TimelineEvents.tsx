@@ -2,6 +2,7 @@
 // System Imports
 import React, { useRef, useEffect, useState } from "react";
 import { motion } from "motion/react";
+import type { Event } from "@/models";
 
 // Stylesheet Imports
 import styles from "@/app/(pages)/(dashboard)/timeline/Timeline.module.scss";
@@ -11,21 +12,9 @@ import TimelinePopup, {
   TimelineEvent as PopupTimelineEvent,
 } from "./TimelinePopup";
 
-interface TimelineEvent {
-  body: string;
-  id: string;
-  event_index: number;
-  narrative_bias: "left" | "right";
-  id: string;
-  version: number;
-}
-
 interface TimelineEventsProps {
-  events: TimelineEvent[][] | TimelineEvent[];
-  onEventClick?: (
-    event: TimelineEvent,
-    e: React.MouseEvent<HTMLDivElement>
-  ) => void;
+  events: Event[][] | Event[];
+  onEventClick?: (event: Event, e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const TimelineEvents: React.FC<TimelineEventsProps> = ({
@@ -33,9 +22,7 @@ const TimelineEvents: React.FC<TimelineEventsProps> = ({
   onEventClick,
 }) => {
   const eventsContainerRef = useRef<HTMLDivElement>(null);
-  const [transformedEvents, setTransformedEvents] = useState<TimelineEvent[]>(
-    []
-  );
+  const [transformedEvents, setTransformedEvents] = useState<Event[]>([]);
   const [dotCount, setDotCount] = useState(0);
 
   // Added state for popup
@@ -58,15 +45,15 @@ const TimelineEvents: React.FC<TimelineEventsProps> = ({
     // Transform the events into a flat array if they are nested
     if (events && Array.isArray(events)) {
       if (events.length > 0 && Array.isArray(events[0])) {
-        setTransformedEvents(events[0] as TimelineEvent[]);
+        setTransformedEvents(events[0] as Event[]);
       } else {
-        setTransformedEvents(events as TimelineEvent[]);
+        setTransformedEvents(events as Event[]);
       }
     }
   }, [events]);
 
   const handleEventClick = (
-    timelineEvent: TimelineEvent,
+    timelineEvent: Event,
     e: React.MouseEvent<HTMLDivElement>
   ) => {
     if (onEventClick) {

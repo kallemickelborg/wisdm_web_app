@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services";
 import { queryKeys, cacheConfig } from "../query/QueryProvider";
 import { useAuth } from "./useAuth";
+import { ApiError } from "@/services/api/apiClient";
 import type { UserProfile } from "@/models";
 
 /**
@@ -22,6 +23,14 @@ export function useUserProfile() {
     queryFn: () => userService.fetchUserProfile(),
     enabled: isAuthenticated && !!idToken, // Only fetch when authenticated with valid token
     ...cacheConfig.user,
+    retry: (failureCount, error) => {
+      // Don't retry on 403 errors (invalid token)
+      if (error instanceof ApiError && error.status === 403) {
+        console.error("❌ 403 error - token is invalid");
+        return false;
+      }
+      return false; // Don't retry user profile queries at all
+    },
   });
 }
 
@@ -56,6 +65,36 @@ export function useUpdateUser() {
     onSuccess: (updatedUser) => {
       // Update user profile in cache
       queryClient.setQueryData(queryKeys.user.profile(), updatedUser);
+    },
+  });
+}
+
+/**
+ * Mutation hook to update user interests (categories)
+ * Backend: PUT /api/users/put/user_interests
+ */
+export function useUpdateUserInterests() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (categoryIds: string[]) =>
+      userService.updateUserInterests(categoryIds),
+    onSuccess: async () => {
+      // Invalidate user profile query (marks it as stale)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.user.profile(),
+      });
+
+      // Force immediate refetch of user profile (ignores staleTime)
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.user.profile(),
+        type: "active", // Only refetch if query is currently being used
+      });
+
+      // Invalidate all timeline queries since they depend on user interests
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.timelines.all(),
+      });
     },
   });
 }

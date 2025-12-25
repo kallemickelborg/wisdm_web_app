@@ -19,3 +19,21 @@ export interface NotificationResponse {
   total: number;
   unread: number;
 }
+
+export interface NotificationFilters {
+  is_read?: boolean;
+  offset?: number;
+  limit?: number;
+}
+
+export interface NotificationSettings {
+  email_notifications?: boolean;
+  push_notifications?: boolean;
+  comment_replies?: boolean;
+  mentions?: boolean;
+  votes?: boolean;
+}
+
+export interface MarkNotificationReadRequest {
+  notification_id: string;
+}

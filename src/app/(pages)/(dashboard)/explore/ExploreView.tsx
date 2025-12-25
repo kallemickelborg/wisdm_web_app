@@ -8,6 +8,7 @@ import { motion, useAnimation, useMotionValue } from "motion/react";
 
 // Component Imports
 import BaseCard from "@/app/_components/cards/BaseCard";
+import LoadingOverlay from "@/app/_components/loading/LoadingOverlay";
 import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
 import BaseHeader from "@/app/_components/header";
 
@@ -134,7 +135,7 @@ const ExploreView = () => {
         <div className={styles.exploreFeedContainer}>
           {isLoading ? (
             <div className={styles.spinnerWrapper}>
-              <LoadingSpinner />
+              <LoadingSpinner size={50} />
             </div>
           ) : (
             <motion.div
@@ -173,7 +174,7 @@ const ExploreView = () => {
       <section className={styles.pageWrapper}>
         {isLoading ? (
           <div className={styles.spinnerWrapper}>
-            <LoadingSpinner />
+            <LoadingSpinner size={50} />
           </div>
         ) : trendingComments.length > 0 ? (
           trendingComments.map((comment) => {

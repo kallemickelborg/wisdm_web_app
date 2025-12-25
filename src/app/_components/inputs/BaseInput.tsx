@@ -1,6 +1,11 @@
 "use client";
 
-import React, { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode, forwardRef } from "react";
+import React, {
+  InputHTMLAttributes,
+  TextareaHTMLAttributes,
+  ReactNode,
+  forwardRef,
+} from "react";
 import Image, { StaticImageData } from "next/image";
 import styles from "./BaseInput.module.scss";
 
@@ -17,7 +22,8 @@ export type InputSize = "small" | "medium" | "large";
 /**
  * Base input component props
  */
-export interface BaseInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface BaseInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   // Variant and size
   variant?: InputVariant;
   size?: InputSize;
@@ -52,19 +58,19 @@ export interface BaseInputProps extends Omit<InputHTMLAttributes<HTMLInputElemen
 
 /**
  * BaseInput - Reusable input component with variant support
- * 
+ *
  * Supports multiple input types through variant system:
  * - default: Standard input with minimal styling
  * - filled: Input with filled background
  * - outlined: Input with border outline
- * 
+ *
  * Features:
  * - Label and helper text support
  * - Error and success states
  * - Icon support (left/right)
  * - Multiline (textarea) mode
  * - Full width option
- * 
+ *
  * @example
  * <BaseInput
  *   label="Email"
@@ -74,7 +80,10 @@ export interface BaseInputProps extends Omit<InputHTMLAttributes<HTMLInputElemen
  *   errorMessage="Invalid email"
  * />
  */
-const BaseInput = forwardRef<HTMLInputElement | HTMLTextareaElement, BaseInputProps>(
+const BaseInput = forwardRef<
+  HTMLInputElement | HTMLTextAreaElement,
+  BaseInputProps
+>(
   (
     {
       variant = "default",
@@ -124,15 +133,23 @@ const BaseInput = forwardRef<HTMLInputElement | HTMLTextareaElement, BaseInputPr
       .filter(Boolean)
       .join(" ");
 
-    const inputClasses = [styles.input, inputClassName].filter(Boolean).join(" ");
+    const inputClasses = [styles.input, inputClassName]
+      .filter(Boolean)
+      .join(" ");
 
-    const labelClasses = [styles.label, labelClassName].filter(Boolean).join(" ");
+    const labelClasses = [styles.label, labelClassName]
+      .filter(Boolean)
+      .join(" ");
 
     // Render icon
-    const renderIcon = (icon: string | StaticImageData | ReactNode, position: "left" | "right") => {
+    const renderIcon = (
+      icon: string | StaticImageData | ReactNode,
+      position: "left" | "right"
+    ) => {
       if (!icon) return null;
 
-      const iconClass = position === "left" ? styles.leftIcon : styles.rightIcon;
+      const iconClass =
+        position === "left" ? styles.leftIcon : styles.rightIcon;
 
       // If icon is a React node, render it directly
       if (React.isValidElement(icon)) {
@@ -164,9 +181,9 @@ const BaseInput = forwardRef<HTMLInputElement | HTMLTextareaElement, BaseInputPr
       if (multiline) {
         return (
           <textarea
-            {...(commonProps as TextareaHTMLAttributes<HTMLTextareaElement>)}
+            {...(commonProps as TextareaHTMLAttributes<HTMLTextAreaElement>)}
             rows={rows}
-            ref={ref as React.Ref<HTMLTextareaElement>}
+            ref={ref as React.Ref<HTMLTextAreaElement>}
           />
         );
       }
@@ -193,8 +210,12 @@ const BaseInput = forwardRef<HTMLInputElement | HTMLTextareaElement, BaseInputPr
           {rightIcon && renderIcon(rightIcon, "right")}
         </div>
 
-        {error && errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
-        {!error && helperText && <p className={styles.helperText}>{helperText}</p>}
+        {error && errorMessage && (
+          <p className={styles.errorText}>{errorMessage}</p>
+        )}
+        {!error && helperText && (
+          <p className={styles.helperText}>{helperText}</p>
+        )}
         {children}
       </div>
     );
@@ -204,4 +225,3 @@ const BaseInput = forwardRef<HTMLInputElement | HTMLTextareaElement, BaseInputPr
 BaseInput.displayName = "BaseInput";
 
 export default BaseInput;
-

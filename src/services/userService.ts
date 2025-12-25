@@ -25,4 +25,13 @@ export const userService = {
     userCrud.update(userId, data),
 
   deleteUser: (userId: string) => userCrud.delete(userId),
+
+  async updateUserInterests(
+    categoryIds: string[]
+  ): Promise<{ message: string; category_ids: string[] }> {
+    return apiClient.put<{ message: string; category_ids: string[] }>(
+      "/users/put/user_interests",
+      { category_ids: categoryIds }
+    );
+  },
 };

@@ -1,44 +1,36 @@
-// CLEAN UP THIS FILE
-
-.overlayContainer {
+// Container
+.loadingOverlayContainer {
   position: fixed;
-  top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: vars.$color-background;
-  backdrop-filter: blur(3px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.contentContainer {
+  top: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2rem; //REMOVE
-}
-
-.logoContainer {
-  display: flex;
   justify-content: center;
-  will-change: transform;
+  align-items: center;
+  gap: vars.$gap-large;
+  background-color: var(--color-bg);
+  z-index: 9999;
 }
 
-.overlayText {
-  color: vars.$color-font-body;
-  font-size: vars.$font-size-header-medium;
+// Dots variant (bouncing dots)
+.dotsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: vars.$gap-small;
 }
 
-.overlayTitle {
-  bottom: 10%;
-  color: vars.$color-brand;
-  position: absolute;
+.dot {
+  background-color: vars.$color-brand;
+  border-radius: 50%;
+}
 
-  h2 {
-    font-size: vars.$font-size-header-large;
-    letter-spacing: 0.05em; // REMOVE
-  }
+// Loading text
+.loadingText {
+  margin: 0;
+  color: var(--color-font-body); // Use theme text color instead of brand
+  font-size: vars.$font-size-body-medium;
+  text-align: center;
 }

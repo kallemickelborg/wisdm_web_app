@@ -8,11 +8,7 @@ import BaseInput from "@/app/_components/inputs/BaseInput";
 // Stylesheet Imports
 import styles from "@/app/(pages)/auth/auth.module.scss";
 
-interface NavigationActions {
-  [key: string]: () => void;
-}
-
-const ForgotPasswordView = ({ login }: NavigationActions) => (
+const ForgotPasswordView = () => (
   <div className={styles.loginWrapper}>
     <div className={styles.loginContainer}>
       <BaseHeader

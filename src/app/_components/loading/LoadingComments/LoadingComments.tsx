@@ -1,5 +1,5 @@
 import React from "react";
-import LoadingSpinner from "../LoadingSpinner";
+import LoadingOverlay from "../LoadingOverlay";
 import styles from "@/app/_components/loading/LoadingComments/LoadingComments.module.scss";
 
 interface LoadingCommentsProps {
@@ -19,7 +19,7 @@ const LoadingComments: React.FC<LoadingCommentsProps> = ({
 
   return (
     <div className={styles.loadingContainer}>
-      <LoadingSpinner size="medium" text={loadingText} />
+      <LoadingOverlay size="medium" text={loadingText} />
     </div>
   );
 };

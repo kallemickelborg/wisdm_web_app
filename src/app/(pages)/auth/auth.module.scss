@@ -7,6 +7,18 @@
 // ============================================
 // MAIN CONTAINER
 // ============================================
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  gap: vars.$gap-medium;
+}
+
 .authLayoutWrapper {
   display: flex;
   flex-direction: column;
@@ -271,14 +283,14 @@
     gap: vars.$gap-medium;
     width: 175px;
 
-    &.selected img {
-      opacity: 0.5;
-    }
-
     img {
       border-radius: vars.$radius-small;
       height: auto;
       width: 100%;
+    }
+
+    &.selected img {
+      opacity: 0.5;
     }
   }
 }

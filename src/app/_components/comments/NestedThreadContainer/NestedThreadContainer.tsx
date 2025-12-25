@@ -1,7 +1,11 @@
-import React, {useState, useEffect, Dispatch} from "react";
+import React, { useState, useEffect, Dispatch } from "react";
 import RecursiveCommentDisplay from "../RecursiveCommentDisplay/RecursiveCommentDisplay";
 import OpenNestedThreadButton from "../OpenNestedThreadButton/OpenNestedThreadButton";
-import { Comment, CommentsByParentId, CommentGroupByIndex } from "@/types";
+import type {
+  Comment,
+  CommentsByParentId,
+  CommentGroupByIndex,
+} from "@/models";
 import { CommentOrder } from "../CommentContainer/commentReducer";
 import { HandleGetComments } from "../RecursiveCommentDisplay/RecursiveCommentDisplay";
 import { CommentActions } from "../CommentContainer/commentReducer";
@@ -26,15 +30,25 @@ interface NestedThreadContainerProps {
 const NestedThreadContainer = (
   props: React.PropsWithChildren<NestedThreadContainerProps>
 ) => {
-  const { parentCollapsed, comment_count, commentsObject, 
-    commentObject, commentId, threadId, orderBy, depth = 0, handleGetComments, parentCommentCount, commentDispatch,
-    threadType 
+  const {
+    parentCollapsed,
+    comment_count,
+    commentsObject,
+    commentObject,
+    commentId,
+    threadId,
+    orderBy,
+    depth = 0,
+    handleGetComments,
+    parentCommentCount,
+    commentDispatch,
+    threadType,
   } = props;
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
     if (!commentObject) {
-      setIsCollapsed(true)
+      setIsCollapsed(true);
     }
   }, [commentObject]);
 
@@ -46,7 +60,7 @@ const NestedThreadContainer = (
         opacity: isCollapsed ? 0 : 1,
       }}
     >
-      {comment_count > 0 && !parentCollapsed &&(
+      {comment_count > 0 && !parentCollapsed && (
         <OpenNestedThreadButton
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}

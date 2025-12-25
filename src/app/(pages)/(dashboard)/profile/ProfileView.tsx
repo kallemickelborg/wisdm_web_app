@@ -1,14 +1,14 @@
 "use client";
 
 // System Imports
-import React, { useState } from "react";
 import Image from "next/image";
+import React, { useState } from "react";
 
 // Component Imports
 import BaseHeader from "@/app/_components/header";
+import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
 import ProfileTabs from "@/app/_components/profile/ProfileTabs";
 import UserSettings from "@/app/_components/profile/UserSettings";
-import LoadingSpinner from "@/app/_components/loading/LoadingSpinner";
 
 // Stylesheet Imports
 import styles from "@/app/(pages)/(dashboard)/profile/Profile.module.scss";
@@ -17,11 +17,11 @@ import styles from "@/app/(pages)/(dashboard)/profile/Profile.module.scss";
 import placeholderAvatar from "@/assets/icons/user_avatar.svg";
 
 // Hooks
-import { useUserProfile, useRecentCommentsByUser } from "@/app/_lib/hooks";
+import { useRecentCommentsByUser, useUserProfile } from "@/app/_lib/hooks";
 
 const ProfileView: React.FC = () => {
   // State
-  const [showSettings, setShowSettings] = useState(false);
+  const [showUserSettings, setShowUserSettings] = useState(false);
   const [activeTab, setActiveTab] = useState("comments");
 
   // Fetch user profile using TanStack Query hook
@@ -30,6 +30,17 @@ const ProfileView: React.FC = () => {
     isLoading: profileLoading,
     error: profileError,
   } = useUserProfile();
+
+  const toggleUserSettings = () => {
+    setShowUserSettings(!showUserSettings);
+  };
+
+  const userSettingsData = {
+    photo_url: user?.photo_url,
+    locality: user?.locality || "",
+    interests: user?.interests || [],
+    traits: user?.traits || [],
+  };
 
   // Fetch user's recent comments using TanStack Query hook
   const {
@@ -51,21 +62,6 @@ const ProfileView: React.FC = () => {
 
   const savedTopics: any[] = [];
   const wordsOfWisdm: any[] = [];
-
-  const toggleSettings = () => {
-    setShowSettings(!showSettings);
-  };
-
-  const userSettingsData = {
-    username: user?.username || "",
-    email: user?.email || "",
-    photo_url: user?.photo_url,
-    name: user?.name || "",
-    gender: user?.gender || "",
-    locality: user?.locality || "",
-    interests: user?.interests || [],
-    traits: user?.traits || [],
-  };
 
   const joinedDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString()
@@ -99,7 +95,7 @@ const ProfileView: React.FC = () => {
           variant="dashboard"
           actionButton={{
             label: "Edit",
-            onClick: toggleSettings,
+            onClick: toggleUserSettings,
             className: styles.editButton,
           }}
         />
@@ -146,13 +142,13 @@ const ProfileView: React.FC = () => {
       {/* Components */}
       <UserSettings
         user={userSettingsData}
-        onBack={toggleSettings}
-        isOpen={showSettings}
+        onBack={toggleUserSettings}
+        isOpen={showUserSettings}
       />
       <div className={styles.scrollableContent}>
         {isLoading ? (
           <div className={styles.spinnerWrapper}>
-            <LoadingSpinner />
+            <LoadingSpinner size={50} />
           </div>
         ) : (
           <ProfileTabs.Content

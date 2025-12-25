@@ -9,8 +9,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useCallback } from "react";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { useEffect, useCallback, useRef } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/app/_lib/firebase/auth/auth";
 import {
   authStorage,
@@ -60,7 +60,6 @@ async function fetchUserProfile(idToken: string): Promise<UserProfile> {
   }
 
   const data = await response.json();
-  // Backend returns user data directly, not nested in a 'user' field
   return data;
 }
 
@@ -75,29 +74,28 @@ export function useAuth(): AuthState & {
   const queryClient = useQueryClient();
   const router = useRouter();
 
+  const firebaseAuthHandledRef = useRef(false);
+
+  const lastRefreshAttemptRef = useRef<number>(0);
+
   // Query for authentication state
   const {
     data: authData,
     isLoading,
     error,
-    refetch: refetchAuth,
   } = useQuery({
     queryKey: queryKeys.auth.token(),
     queryFn: () => {
       const stored = authStorage.getAuthData();
       if (!stored) return null;
 
-      // Check if token needs refresh
-      if (authStorage.needsRefresh()) {
-        // Trigger refresh in background
-        refreshTokenMutation.mutate();
-      }
+      // NOTE: Do NOT trigger refresh mutation here!
+      // This was causing infinite loops when the mutation failed.
+      // Token refresh is now handled by a separate useEffect below.
 
       return stored;
     },
     ...cacheConfig.auth,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
   });
 
   // Mutation for token refresh
@@ -139,12 +137,20 @@ export function useAuth(): AuthState & {
       queryClient.setQueryData(queryKeys.auth.token(), newAuthData);
     },
     onError: (error) => {
-      console.error("Token refresh failed:", error);
-      logout();
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      if (
+        errorMessage.includes("User not authenticated") ||
+        errorMessage.includes("auth/") ||
+        errorMessage.includes("403")
+      ) {
+        logout();
+      }
     },
   });
 
-  // Login function
+  // Login function - stable reference to prevent useEffect re-runs
   const login = useCallback(
     (newAuthData: AuthData) => {
       authStorage.saveAuthData(newAuthData);
@@ -160,20 +166,54 @@ export function useAuth(): AuthState & {
     [queryClient]
   );
 
-  // Logout function
-  const logout = useCallback(() => {
+  // Logout function - stable reference to prevent useEffect re-runs
+  const logout = useCallback(async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out from Firebase:", error);
+    }
+
     authStorage.clearAuthData();
     userProfileStorage.clearUserProfile();
     queryClient.clear(); // Clear all cached data
+
     router.push("/auth");
   }, [queryClient, router]);
 
-  // Refresh token function
   const refreshToken = useCallback(async () => {
     await refreshTokenMutation.mutateAsync();
   }, [refreshTokenMutation]);
 
-  // Cross-tab synchronization
+  useEffect(() => {
+    if (!authData || refreshTokenMutation.isPending) {
+      return;
+    }
+
+    if (authStorage.needsRefresh()) {
+      const now = Date.now();
+      const timeSinceLastAttempt = now - lastRefreshAttemptRef.current;
+      const MIN_REFRESH_INTERVAL = 5000;
+
+      if (timeSinceLastAttempt < MIN_REFRESH_INTERVAL) {
+        console.log(
+          `⏳ Token refresh throttled - last attempt was ${timeSinceLastAttempt}ms ago`
+        );
+        return;
+      }
+
+      lastRefreshAttemptRef.current = now;
+
+      const refreshTimeout = setTimeout(() => {
+        if (authStorage.needsRefresh() && !refreshTokenMutation.isPending) {
+          refreshTokenMutation.mutate();
+        }
+      }, 1000);
+
+      return () => clearTimeout(refreshTimeout);
+    }
+  }, [authData, refreshTokenMutation]);
+
   useEffect(() => {
     const cleanup = authSyncUtils.onAuthChange((syncedAuthData) => {
       if (syncedAuthData) {
@@ -187,11 +227,22 @@ export function useAuth(): AuthState & {
     return cleanup;
   }, [queryClient]);
 
-  // Firebase auth state listener (for initial setup and external changes)
+  // Firebase auth state listener - handles login/logout events
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // Skip if this is the initial mount and we already have auth data
+      // This prevents unnecessary re-authentication on page load
+      if (firebaseAuthHandledRef.current && authData) {
+        console.log(
+          "⏭️ Skipping Firebase auth state change - already authenticated"
+        );
+        return;
+      }
+
       if (user && !authData) {
-        // User is authenticated in Firebase but not in our cache
+        console.log("✅ Firebase user detected - logging in");
+        firebaseAuthHandledRef.current = true;
+
         try {
           const idToken = await user.getIdToken();
           const tokenResult = await user.getIdTokenResult();
@@ -212,13 +263,20 @@ export function useAuth(): AuthState & {
           console.error("Failed to get Firebase token:", error);
         }
       } else if (!user && authData) {
-        // User is not authenticated in Firebase but we have cached data
-        logout();
+        console.log("🚪 Firebase user logged out - clearing auth data");
+        firebaseAuthHandledRef.current = false; // Reset so we can detect next login
+        authStorage.clearAuthData();
+        userProfileStorage.clearUserProfile();
+        queryClient.setQueryData(queryKeys.auth.token(), null);
+      } else {
+        firebaseAuthHandledRef.current = true;
       }
     });
 
-    return unsubscribe;
-  }, [authData, login, logout]);
+    return () => {
+      unsubscribe();
+    };
+  }, [authData, login, queryClient]); // Include authData to detect changes
 
   return {
     isAuthenticated: !!authData,
@@ -229,86 +287,5 @@ export function useAuth(): AuthState & {
     login,
     logout,
     refreshToken,
-  };
-}
-
-/**
- * User profile hook
- *
- * @deprecated This hook is deprecated. Use `useUserProfile` from '@/app/_lib/hooks' instead.
- * This version conflicts with the service-based hooks and causes duplicate queries.
- *
- * REMOVED: This function has been removed to prevent conflicts with the new service-based hooks.
- * All components should now use: import { useUserProfile } from '@/app/_lib/hooks';
- */
-// export function useUserProfile(): UserProfileState & {
-//   updateProfile: (updates: Partial<UserProfile>) => void;
-//   refetchProfile: () => void;
-// } {
-//   ... (removed to prevent conflicts)
-// }
-
-/**
- * Authentication redirect hook
- */
-export function useAuthRedirect() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-
-  const redirectToLogin = useCallback(() => {
-    router.push("/auth");
-  }, [router]);
-
-  const redirectToDashboard = useCallback(() => {
-    router.push("/home");
-  }, [router]);
-
-  const redirectIfAuthenticated = useCallback(
-    (targetPath: string = "/home") => {
-      if (isAuthenticated && !isLoading) {
-        router.push(targetPath);
-        return true;
-      }
-      return false;
-    },
-    [isAuthenticated, isLoading, router]
-  );
-
-  const redirectIfNotAuthenticated = useCallback(
-    (targetPath: string = "/auth") => {
-      if (!isAuthenticated && !isLoading) {
-        router.push(targetPath);
-        return true;
-      }
-      return false;
-    },
-    [isAuthenticated, isLoading, router]
-  );
-
-  return {
-    redirectToLogin,
-    redirectToDashboard,
-    redirectIfAuthenticated,
-    redirectIfNotAuthenticated,
-  };
-}
-
-/**
- * Protected route hook
- */
-export function useProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const { redirectIfNotAuthenticated } = useAuthRedirect();
-
-  useEffect(() => {
-    if (!isLoading) {
-      redirectIfNotAuthenticated();
-    }
-  }, [isAuthenticated, isLoading, redirectIfNotAuthenticated]);
-
-  return {
-    isAuthenticated,
-    isLoading,
-    canAccess: isAuthenticated && !isLoading,
   };
 }

@@ -1,18 +1,22 @@
-'use client'
+"use client";
 
-import { getDeviceType } from "@/app/_lib/helper/device/getDeviceType"
+import { getDeviceType } from "@/app/_lib/helper/device/getDeviceType";
 
-export const  determineSignInSequence = (popUpSequence: Function, redirectSequence: Function) => {
-  const deviceType = getDeviceType()
-  switch(deviceType) {
-    case 'Mobile' || 'Tablet':
-      redirectSequence()
-      break
-    case 'Desktop':
-      popUpSequence()
-      break
+export const determineSignInSequence = (
+  popUpSequence: Function,
+  redirectSequence: Function
+) => {
+  const deviceType = getDeviceType();
+  switch (deviceType) {
+    case "Mobile":
+    case "Tablet":
+      redirectSequence();
+      break;
+    case "Desktop":
+      popUpSequence();
+      break;
     default:
-      popUpSequence()
-      break
+      popUpSequence();
+      break;
   }
-}
+};

@@ -12,7 +12,6 @@ import BaseHeader from "@/app/_components/header";
 
 // Asset Imports
 import progressCircle5 from "@/assets/icons/progress_circle_5.svg";
-import tech from "@/assets/images/tech.png";
 
 import { useSignup } from "@/app/_contexts/SignupContext";
 
@@ -96,7 +95,7 @@ const InterestsView = () => {
     return (
       <div className={styles.loginWrapper}>
         <div className={styles.loginContainer}>
-          <LoadingOverlay isVisible={true} />
+          {/* <LoadingOverlay isVisible={true} /> */}
           <p>Loading categories...</p>
         </div>
       </div>
@@ -158,7 +157,7 @@ const InterestsView = () => {
               }`}
               onClick={() => handleInterestClick(category.id)}
             >
-              <img src={tech.src} alt={category.name} />
+              <img src={category.image_url} alt={category.name} />
               <p>{category.name}</p>
             </div>
           ))}

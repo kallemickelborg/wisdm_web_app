@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { notificationService } from "@/services";
 import { queryKeys, cacheConfig } from "../query/QueryProvider";
 import { useAuth } from "./useAuth";
+import { ApiError } from "@/services/api/apiClient";
 import type {
   Notification,
   NotificationFilters,
@@ -35,6 +36,14 @@ export function useNotifications(filters?: NotificationFilters) {
     queryFn: () => notificationService.fetchNotifications(filters),
     enabled: isAuthenticated && !!idToken, // Only fetch when authenticated with valid token
     ...cacheConfig.notifications,
+    retry: (failureCount, error) => {
+      // Don't retry on 403 errors (invalid token)
+      if (error instanceof ApiError && error.status === 403) {
+        console.error("❌ 403 error - token is invalid");
+        return false;
+      }
+      return false; // Don't retry notification queries at all
+    },
   });
 }
 
@@ -54,6 +63,14 @@ export function useUnreadNotificationCount() {
     ...cacheConfig.notifications,
     // Refetch more frequently for real-time updates
     refetchInterval: 30 * 1000, // 30 seconds
+    retry: (failureCount, error) => {
+      // Don't retry on 403 errors (invalid token)
+      if (error instanceof ApiError && error.status === 403) {
+        console.error("❌ 403 error - token is invalid");
+        return false;
+      }
+      return false; // Don't retry
+    },
   });
 }
 
@@ -100,7 +117,7 @@ export function useMarkNotificationAsRead() {
 
   return useMutation({
     mutationFn: (request: MarkNotificationReadRequest) =>
-      notificationService.markAsRead(request),
+      notificationService.markAsRead(request.notification_id),
     onMutate: async (variables) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
@@ -119,9 +136,11 @@ export function useMarkNotificationAsRead() {
         return {
           ...old,
           notifications: old.notifications.map((notif: Notification) =>
-            notif.id === variables.id ? { ...notif, read: true } : notif
+            notif.id === variables.notification_id
+              ? { ...notif, is_read: true }
+              : notif
           ),
-          unread_count: Math.max(0, (old.unread_count || 0) - 1),
+          unread: Math.max(0, (old.unread || 0) - 1),
         };
       });
 

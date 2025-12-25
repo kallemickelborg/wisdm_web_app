@@ -39,3 +39,6 @@ export { notificationService } from "./notificationService";
 
 // Utility Service
 export { utilityService } from "./utilityService";
+
+// Image Service
+export { imageService } from "./imageService";

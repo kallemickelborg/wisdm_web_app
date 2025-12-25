@@ -1,41 +1,19 @@
-// Container
-.spinnerContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: vars.$gap-medium;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-// Spinner variant (rotating circle)
-/* .spinnerCircle {
-  border: 4px solid rgba(vars.$color-brand-rgb, 0.2);
-  border-top: 4px solid vars.$color-brand;
-  border-radius: 50%;
-  will-change: transform;
-} */
-
-// Dots variant (bouncing dots)
-.dotsContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: vars.$gap-small;
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+  display: inline-block;
 }
 
-.dot {
-  border-radius: 50%;
-}
-
-// Pulse variant (pulsing circle)
-.pulseCircle {
-  border-radius: 50%;
-}
-
-// Loading text
-.loadingText {
-  margin: 0;
-  font-size: vars.$font-size-body-small;
-  /*   color: vars.$color-font-detail; */
-  text-align: center;
+.loadingSpinnerCircle {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 10;
+  transform-origin: center;
 }
